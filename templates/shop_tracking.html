@@ -1,0 +1,333 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Live Order Tracking{% endblock %}
+{% block header_title %}Live Logistics Tracking{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background-color: #0a0a0a;
+        background-image: radial-gradient(rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+    
+    /* Map Simulation Area */
+    .map-container {
+        position: relative;
+        overflow: hidden;
+        background-color: #121212;
+        background-image: 
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+    }
+
+    .pulse-ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 2px solid rgba(212, 175, 55, 0.8);
+        animation: radar-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        pointer-events: none;
+    }
+
+    @keyframes radar-pulse {
+        0% { width: 20px; height: 20px; opacity: 1; margin-left: -10px; margin-top: -10px; }
+        100% { width: 150px; height: 150px; opacity: 0; margin-left: -75px; margin-top: -75px; }
+    }
+
+    .vehicle-icon {
+        position: absolute;
+        transition: all 1s ease-in-out;
+        z-index: 10;
+        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.8));
+    }
+    
+    .map-path {
+        stroke-dasharray: 8, 8;
+        animation: dash-flow 20s linear infinite;
+    }
+    @keyframes dash-flow {
+        to { stroke-dashoffset: -100; }
+    }
+
+    /* Scrollable Feed */
+    .tracking-feed::-webkit-scrollbar {
+        width: 6px;
+    }
+    .tracking-feed::-webkit-scrollbar-thumb {
+        background-color: #333;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto pb-12 space-y-6">
+    
+    <!-- Header & Order Selector -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-brand-gold/5 p-6 rounded-2xl border border-brand-gold/20 backdrop-blur-sm">
+        <div>
+            <h2 class="text-2xl font-serif text-brand-lightgold">Global Logistics Radar</h2>
+            <p class="text-gray-400 text-sm mt-1">Real-time GPS tracking and supply chain telemetry.</p>
+        </div>
+        <div class="w-full md:w-1/3">
+            <label class="block text-xs uppercase tracking-wider text-gray-500 font-bold mb-2">Select Active Shipment</label>
+            <select id="order-selector" class="w-full bg-[#111] border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-gold appearance-none font-mono text-sm shadow-inner transition-colors">
+                <option value="">Loading active shipments...</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Interactive Map Panel -->
+        <div class="lg:col-span-2 glass-panel rounded-2xl border border-gray-800 overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.5)] flex flex-col">
+            <div class="p-4 border-b border-gray-800 bg-[#0a0a0a] flex justify-between items-center z-10 relative shadow-md">
+                <div class="flex items-center space-x-3">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span class="text-white font-bold text-sm tracking-widest uppercase">Live GPS Connected</span>
+                </div>
+                <div class="flex space-x-2 text-xs text-gray-400 font-mono">
+                    <span>LAT: <span id="lat-display">23.2599</span></span>
+                    <span class="mx-2">|</span>
+                    <span>LNG: <span id="lng-display">77.4126</span></span>
+                </div>
+            </div>
+            
+            <div class="map-container flex-1 h-[500px] relative" id="map-area">
+                <!-- SVG Map Routing Lines -->
+                <svg width="100%" height="100%" class="absolute inset-0">
+                    <!-- Base route -->
+                    <path d="M 100 400 Q 300 450, 400 300 T 700 150" fill="none" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+                    <!-- Active flowing route -->
+                    <path class="map-path" d="M 100 400 Q 300 450, 400 300 T 700 150" fill="none" stroke="#d4af37" stroke-width="4" stroke-linecap="round"/>
+                    
+                    <!-- Nodes -->
+                    <!-- Origin Node -->
+                    <circle cx="100" cy="400" r="8" fill="#d4af37" />
+                    <text x="90" y="425" fill="#888" font-size="12" font-family="monospace">Weaver Hub (MP)</text>
+                    
+                    <!-- Destination Node -->
+                    <circle cx="700" cy="150" r="8" fill="#22c55e" />
+                    <text x="680" y="135" fill="#888" font-size="12" font-family="monospace">Delivery Address</text>
+                </svg>
+
+                <!-- Vehicle Tracker -->
+                <div id="truck-tracker" class="vehicle-icon hidden" style="left: 100px; top: 400px;">
+                    <div class="w-8 h-8 bg-brand-gold rounded-full flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 relative shadow-[0_0_15px_rgba(212,175,55,0.6)]">
+                        <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                        <div class="pulse-ring" style="top: 50%; left: 50%;"></div>
+                    </div>
+                    <div class="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur text-white text-xs px-2 py-1 rounded font-mono border border-brand-gold/30 whitespace-nowrap">
+                        Unit #HT-992
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="no-order-map-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-20">
+                    <svg class="w-16 h-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    <h3 class="text-xl text-gray-300 font-serif">No Active Shipments Selected</h3>
+                    <p class="text-gray-500 text-sm mt-2">Please select an order from the dropdown.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telemetry Feed -->
+        <div class="flex flex-col gap-6">
+            
+            <!-- Courier Details -->
+            <div class="glass-panel p-6 rounded-2xl border border-gray-800 shadow-xl opacity-50 transition-opacity duration-300" id="courier-card">
+                <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-800 pb-2">Logistics Partner</h4>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center p-2 shadow-inner">
+                        <svg class="w-8 h-8 text-blue-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5L18.5 19H5.5L12 6.5z"/></svg>
+                    </div>
+                    <div>
+                        <h5 class="text-white font-bold text-lg">Heritage Express</h5>
+                        <p class="text-xs text-brand-gold font-mono tracking-wide" id="tracking-number-display">Awaiting TRK...</p>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-800">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-500">Driver</span>
+                        <span class="text-white font-medium">Rajesh K. (In Transit)</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm mt-2">
+                        <span class="text-gray-500">Est. Arrival</span>
+                        <span class="text-green-400 font-bold" id="est-arrival-display">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Log -->
+            <div class="glass-panel rounded-2xl border border-gray-800 shadow-xl flex-1 flex flex-col overflow-hidden opacity-50 transition-opacity duration-300" id="feed-card">
+                <div class="p-4 border-b border-gray-800 bg-[#0a0a0a]">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Telemetry Feed
+                    </h4>
+                </div>
+                <div class="p-6 tracking-feed overflow-y-auto flex-1 max-h-[300px]" id="activity-log-container">
+                    <!-- Events injected via JS -->
+                    <div class="text-center text-gray-600 text-sm mt-10">Awaiting connection...</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const selector = document.getElementById('order-selector');
+    const noOrderOverlay = document.getElementById('no-order-map-overlay');
+    const truckTracker = document.getElementById('truck-tracker');
+    const courierCard = document.getElementById('courier-card');
+    const feedCard = document.getElementById('feed-card');
+    const logContainer = document.getElementById('activity-log-container');
+    const latDisplay = document.getElementById('lat-display');
+    const lngDisplay = document.getElementById('lng-display');
+
+    // 1. Load Orders
+    let userOrders = JSON.parse(localStorage.getItem('userOrders')) || [];
+    
+    // Filter only active orders (Processing, In Transit)
+    const activeOrders = userOrders.filter(o => o.status !== 'Cancelled' && o.status !== 'Delivered');
+
+    if (activeOrders.length === 0) {
+        selector.innerHTML = '<option value="">No Active Shipments Found</option>';
+        selector.disabled = true;
+    } else {
+        selector.innerHTML = '<option value="">-- Select an Order to Track --</option>';
+        activeOrders.forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o.id;
+            opt.textContent = `${o.id} - ${o.firstItemTitle || 'Custom Order'} (${o.status})`;
+            selector.appendChild(opt);
+        });
+    }
+
+    // Map Path Coordinates for Simulation
+    // Path roughly matches the SVG quadratic bezier curve
+    const pathPoints = [
+        { x: 100, y: 400, lat: 23.2599, lng: 77.4126, msg: "Package picked up at Weaver Hub (MP)" },
+        { x: 200, y: 425, lat: 24.5200, lng: 78.1000, msg: "In Transit: En route to Regional Sorting Center" },
+        { x: 320, y: 430, lat: 25.8000, lng: 79.5000, msg: "Scanned at Regional Sorting Center" },
+        { x: 420, y: 340, lat: 27.2000, lng: 80.3000, msg: "Departed from Sorting Center" },
+        { x: 550, y: 220, lat: 28.5000, lng: 81.6000, msg: "Arrived at Local Destination Hub" },
+        { x: 650, y: 170, lat: 29.1000, lng: 82.2000, msg: "Out for Delivery" },
+        { x: 700, y: 150, lat: 29.5000, lng: 82.8000, msg: "Approaching Delivery Address" }
+    ];
+
+    let simulationInterval = null;
+    let currentStep = 0;
+
+    function formatTime(date) {
+        return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+
+    function addLogEntry(msg, isFirst = false) {
+        const div = document.createElement('div');
+        div.className = `flex gap-4 ${isFirst ? '' : 'mt-6'}`;
+        div.innerHTML = `
+            <div class="flex flex-col items-center">
+                <div class="w-3 h-3 rounded-full bg-brand-gold shadow-[0_0_8px_rgba(212,175,55,0.8)] relative z-10"></div>
+                <div class="w-0.5 h-full bg-gray-700 mt-1 rounded"></div>
+            </div>
+            <div class="pb-2">
+                <p class="text-xs text-brand-gold font-mono mb-1">${formatTime(new Date())}</p>
+                <p class="text-sm text-gray-200">${msg}</p>
+            </div>
+        `;
+        logContainer.prepend(div);
+    }
+
+    selector.addEventListener('change', (e) => {
+        const orderId = e.target.value;
+        clearInterval(simulationInterval);
+        
+        if (!orderId) {
+            // Reset UI
+            noOrderOverlay.style.display = 'flex';
+            truckTracker.classList.add('hidden');
+            courierCard.classList.remove('opacity-100');
+            courierCard.classList.add('opacity-50');
+            feedCard.classList.remove('opacity-100');
+            feedCard.classList.add('opacity-50');
+            logContainer.innerHTML = '<div class="text-center text-gray-600 text-sm mt-10">Awaiting connection...</div>';
+            return;
+        }
+
+        const selectedOrder = activeOrders.find(o => o.id === orderId);
+
+        // Activate UI
+        noOrderOverlay.style.display = 'none';
+        truckTracker.classList.remove('hidden');
+        courierCard.classList.remove('opacity-50');
+        courierCard.classList.add('opacity-100');
+        feedCard.classList.remove('opacity-50');
+        feedCard.classList.add('opacity-100');
+
+        // Populate Data
+        document.getElementById('tracking-number-display').innerText = `TRK-${orderId.replace('#ORD-', '')}IN`;
+        document.getElementById('est-arrival-display').innerText = selectedOrder.estDelivery || "Pending";
+        
+        // Reset Simulation
+        logContainer.innerHTML = '';
+        currentStep = 0;
+        
+        // Initial setup
+        addLogEntry("Order information received by carrier. Generating route map...", true);
+        
+        // Determine starting point based on status
+        let startIdx = 0;
+        if(selectedOrder.status === 'In Transit') startIdx = 3; // Start half way
+        
+        currentStep = startIdx;
+        const startPoint = pathPoints[currentStep];
+        
+        truckTracker.style.left = `${startPoint.x}px`;
+        truckTracker.style.top = `${startPoint.y}px`;
+        latDisplay.innerText = startPoint.lat.toFixed(4);
+        lngDisplay.innerText = startPoint.lng.toFixed(4);
+        addLogEntry(startPoint.msg);
+
+        // Start Simulation Loop
+        simulationInterval = setInterval(() => {
+            currentStep++;
+            if (currentStep >= pathPoints.length) {
+                clearInterval(simulationInterval);
+                addLogEntry("Package has been Delivered!", false);
+                return;
+            }
+
+            const point = pathPoints[currentStep];
+            
+            // Move Truck
+            truckTracker.style.left = `${point.x}px`;
+            truckTracker.style.top = `${point.y}px`;
+            
+            // Jitter GPS coordinates slightly for realism before settling on exact point
+            let ticks = 0;
+            const gpsJitter = setInterval(() => {
+                latDisplay.innerText = (point.lat + (Math.random() * 0.05 - 0.025)).toFixed(4);
+                lngDisplay.innerText = (point.lng + (Math.random() * 0.05 - 0.025)).toFixed(4);
+                ticks++;
+                if (ticks > 5) {
+                    clearInterval(gpsJitter);
+                    latDisplay.innerText = point.lat.toFixed(4);
+                    lngDisplay.innerText = point.lng.toFixed(4);
+                }
+            }, 200);
+
+            // Add Log Entry
+            addLogEntry(point.msg);
+
+        }, 4000); // Simulate movement every 4 seconds
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,398 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}My Workspace{% endblock %}
+{% block header_title %}Weaver Workspace{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- Left Column: KPIs and Active Jobs -->
+    <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Hero KPIs -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="glass-card rounded p-4 relative overflow-hidden group">
+                <h3 class="text-[10px] font-sans text-brand-lightgold/50 uppercase tracking-widest mb-1">Total Products</h3>
+                <p class="text-2xl font-bold text-brand-gold">{{ total_products }}</p>
+                <p class="text-[10px] text-brand-lightgold/40 mt-1">Marketplace</p>
+            </div>
+            <div class="glass-card rounded p-4 relative overflow-hidden group">
+                <h3 class="text-[10px] font-sans text-brand-lightgold/50 uppercase tracking-widest mb-1">Pending Orders</h3>
+                <p class="text-2xl font-bold text-brand-gold">{{ pending_orders }}</p>
+                <p class="text-[10px] text-brand-lightgold/40 mt-1">To process</p>
+            </div>
+            <div class="glass-card rounded p-4 relative overflow-hidden group">
+                <h3 class="text-[10px] font-sans text-brand-lightgold/50 uppercase tracking-widest mb-1">Active Jobs</h3>
+                <p class="text-2xl font-bold text-brand-gold">{{ active_jobs }}</p>
+                <p class="text-[10px] text-brand-lightgold/40 mt-1">In progress</p>
+            </div>
+            <div class="glass-card rounded p-4 relative overflow-hidden group">
+                <h3 class="text-[10px] font-sans text-brand-lightgold/50 uppercase tracking-widest mb-1">Completed</h3>
+                <p class="text-2xl font-bold text-brand-gold">{{ completed_jobs }}</p>
+                <p class="text-[10px] text-brand-lightgold/40 mt-1">Delivered</p>
+            </div>
+            <div class="glass-card rounded p-4 relative overflow-hidden group" id="earnings">
+                <h3 class="text-[10px] font-sans text-brand-lightgold/50 uppercase tracking-widest mb-1">Total Earnings</h3>
+                <p class="text-2xl font-bold text-brand-gold">₹{{ "{:,.0f}".format(total_earnings) }}</p>
+                <p class="text-[10px] text-brand-lightgold/40 mt-1">Lifetime</p>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card rounded p-6">
+                <h3 class="text-sm font-sans text-brand-gold uppercase tracking-widest mb-4">Monthly Earnings</h3>
+                <div class="h-48 relative">
+                    <canvas id="earningsChart"></canvas>
+                </div>
+            </div>
+            <div class="glass-card rounded p-6">
+                <h3 class="text-sm font-sans text-brand-gold uppercase tracking-widest mb-4">Production Progress</h3>
+                <div class="h-48 relative">
+                    <canvas id="productionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities Feed -->
+        <div class="glass-card rounded overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-brand-gold/10 bg-brand-black/40">
+                <h2 class="text-lg font-serif text-brand-gold">Recent Activities</h2>
+            </div>
+            <div class="p-0">
+                <ul class="divide-y divide-brand-gold/10">
+                    {% for activity in recent_activities %}
+                    <li class="px-6 py-4 hover:bg-brand-gold/5 transition-colors flex items-start space-x-4">
+                        <div class="flex-shrink-0 mt-1">
+                            {% if activity.type == 'order' %}
+                            <div class="w-8 h-8 rounded-full bg-blue-900/30 flex items-center justify-center text-blue-400 border border-blue-500/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                            </div>
+                            {% elif activity.type == 'payment' %}
+                            <div class="w-8 h-8 rounded-full bg-green-900/30 flex items-center justify-center text-green-400 border border-green-500/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            {% elif activity.type == 'product' %}
+                            <div class="w-8 h-8 rounded-full bg-yellow-900/30 flex items-center justify-center text-yellow-400 border border-yellow-500/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                            </div>
+                            {% else %}
+                            <div class="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold border border-brand-gold/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-brand-lightgold">{{ activity.message }}</p>
+                            <p class="text-xs text-brand-lightgold/40 mt-1">{{ activity.time }}</p>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="px-6 py-6 text-center text-brand-lightgold/40 text-sm italic">No recent activities.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Active Job Board -->
+        <div class="glass-card rounded overflow-hidden">
+            <div class="px-8 py-6 border-b border-brand-gold/10 bg-brand-black/40 flex justify-between items-center">
+                <h2 class="text-xl font-serif text-brand-gold">Active Job Board</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-brand-gold/10">
+                    <thead class="bg-brand-black/80">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">ID</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Design</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Qty</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Status</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-brand-gold/5 bg-brand-dark/50">
+                        {% for log in logs %}
+                        <tr class="hover:bg-brand-gold/5 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-brand-gold font-mono">#{{ log.log_id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ log.design_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ log.quantity }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                {% if log.status == 'Completed' %}
+                                    <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-semibold rounded uppercase tracking-wider bg-green-900/40 text-green-400 border border-green-500/30">Completed</span>
+                                {% else %}
+                                    <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-semibold rounded uppercase tracking-wider bg-brand-gold/10 text-brand-gold border border-brand-gold/30">{{ log.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                {% if log.status != 'Completed' %}
+                                <button type="button" onclick="markJobCompleted({{ log.log_id }}, this)" class="text-xs bg-brand-gold/20 hover:bg-brand-gold hover:text-brand-black text-brand-gold px-3 py-1.5 rounded transition-colors font-semibold border border-brand-gold/30">
+                                    Mark Completed
+                                </button>
+                                {% else %}
+                                <span class="text-xs text-brand-lightgold/30 italic">Done</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-brand-lightgold/50 text-sm">No active jobs assigned yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right Column: Material Requisition -->
+    <div class="lg:col-span-1 space-y-8" id="request-materials">
+        <div class="glass-card rounded overflow-hidden">
+            <div class="px-6 py-5 border-b border-brand-gold/10 bg-brand-black/40">
+                <h2 class="text-xl font-serif text-brand-gold flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Material Requisition
+                </h2>
+                <p class="text-xs text-brand-lightgold/50 mt-1">Request raw materials for your active looms.</p>
+            </div>
+            <div class="p-6 bg-brand-dark/50">
+                <form action="{{ url_for('request_materials') }}" method="POST" class="space-y-5">
+                    <div>
+                        <label for="material_type" class="block text-xs font-semibold text-brand-lightgold/70 uppercase tracking-widest mb-2">Material Type</label>
+                        <select id="material_type" name="material_type" required class="w-full px-4 py-3 rounded-sm transition-all text-brand-gold bg-brand-black border border-brand-gold/30 focus:outline-none focus:border-brand-gold appearance-none cursor-pointer text-sm">
+                            <option value="Silk Yarn">Silk Yarn (Pure)</option>
+                            <option value="Cotton Thread">Cotton Thread</option>
+                            <option value="Gold Zari">Gold Zari</option>
+                            <option value="Silver Zari">Silver Zari</option>
+                            <option value="Dye">Natural Dye</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="quantity" class="block text-xs font-semibold text-brand-lightgold/70 uppercase tracking-widest mb-2">Quantity (Kg/Units)</label>
+                        <input type="number" id="quantity" name="quantity" min="1" required class="w-full px-4 py-3 rounded-sm transition-all text-brand-lightgold bg-brand-black border border-brand-gold/30 focus:outline-none focus:border-brand-gold text-sm placeholder-brand-lightgold/30" placeholder="e.g. 5">
+                    </div>
+                    <div>
+                        <label for="urgent" class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="urgent" name="urgent" class="w-4 h-4 rounded border-brand-gold/30 text-brand-gold focus:ring-brand-gold bg-brand-black">
+                            <span class="text-xs font-semibold text-brand-lightgold/70 uppercase tracking-widest">Mark as Urgent</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="w-full bg-brand-gold hover:bg-yellow-500 text-brand-black font-bold uppercase tracking-widest py-3 px-4 rounded-sm transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] text-sm mt-4 transform hover:-translate-y-0.5">
+                        Submit Request
+                    </button>
+                </form>
+            </div>
+        </div>
+        <!-- Smart Loom Environment Widget -->
+        <div class="glass-card rounded overflow-hidden mt-8 border-t-4 border-t-brand-gold relative group">
+            <div class="absolute inset-0 bg-gradient-to-br from-brand-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            <div class="p-6 relative z-10">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xs font-sans text-brand-lightgold/50 uppercase tracking-widest">Smart Loom Sensors</h3>
+                    <div class="flex items-center space-x-1">
+                        <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
+                        <span class="text-[10px] text-green-400 font-bold uppercase tracking-widest">Online</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <!-- Radial Efficiency Gauge -->
+                    <div class="relative w-24 h-24">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <!-- Background Circle -->
+                            <path class="text-brand-gold/20" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+                            <!-- Progress Circle -->
+                            <path class="text-brand-gold drop-shadow-[0_0_4px_rgba(212,175,55,0.8)] transition-all duration-1000 ease-out" stroke-dasharray="87, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-xl font-bold text-brand-lightgold">87%</span>
+                            <span class="text-[8px] uppercase tracking-widest text-brand-gold/70 mt-1">Efficiency</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Environmental Stats -->
+                    <div class="space-y-4 flex-1 ml-6 border-l border-brand-gold/10 pl-6">
+                        <div>
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="text-xs text-brand-lightgold/60 uppercase tracking-widest flex items-center">
+                                    <svg class="w-3 h-3 mr-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                                    Room Humidity
+                                </span>
+                                <span class="text-sm font-bold text-blue-400">65%</span>
+                            </div>
+                            <div class="w-full bg-brand-gold/10 rounded-full h-1 relative overflow-hidden">
+                                <div class="bg-blue-400 h-1 rounded-full absolute left-0 top-0 shadow-[0_0_8px_rgba(96,165,250,0.8)]" style="width: 65%"></div>
+                            </div>
+                            <p class="text-[10px] text-gray-500 mt-1 italic">Optimal for Silk Threading</p>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="text-xs text-brand-lightgold/60 uppercase tracking-widest flex items-center">
+                                    <svg class="w-3 h-3 mr-1 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Warp Tension
+                                </span>
+                                <span class="text-sm font-bold text-orange-400 animate-pulse">Check Req.</span>
+                            </div>
+                            <div class="w-full bg-brand-gold/10 rounded-full h-1 relative overflow-hidden">
+                                <div class="bg-orange-400 h-1 rounded-full absolute left-0 top-0 shadow-[0_0_8px_rgba(251,146,60,0.8)]" style="width: 40%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Daily Production Target Widget -->
+        <div class="glass-card rounded overflow-hidden mt-8 border-t-4 border-t-brand-gold relative group">
+            <div class="p-6">
+                <h3 class="text-xs font-sans text-brand-lightgold/50 uppercase tracking-widest mb-4">Daily Loom Output</h3>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-brand-gold">2.4 Meters</span>
+                    <span class="text-xs text-brand-lightgold/70">Target: 3.5m</span>
+                </div>
+                <div class="w-full bg-brand-black rounded-full h-2.5 border border-brand-gold/20 relative overflow-hidden">
+                    <div class="bg-gradient-to-r from-brand-gold/50 to-brand-gold h-2.5 rounded-full shadow-[0_0_10px_rgba(212,175,55,0.8)]" style="width: 68%"></div>
+                </div>
+                <p class="text-[10px] text-brand-lightgold/50 mt-2 text-right">68% completed today</p>
+            </div>
+        </div>
+
+        <!-- Loom Material Inventory Widget -->
+        <div class="glass-card rounded overflow-hidden mt-8 border-t-4 border-t-brand-gold relative group">
+            <div class="p-6">
+                <h3 class="text-xs font-sans text-brand-lightgold/50 uppercase tracking-widest mb-4 flex items-center justify-between">
+                    Current Loom Spools
+                    <a href="#quantity" class="text-[9px] text-blue-400 hover:text-blue-300 underline uppercase font-bold tracking-widest">Restock</a>
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Material 1 -->
+                    <div class="flex justify-between items-center bg-[#1a1a1a] p-3 rounded border border-brand-gold/10 hover:border-brand-gold/30 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded bg-brand-gold/10 flex items-center justify-center mr-3 border border-brand-gold/20">
+                                <svg class="w-4 h-4 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-brand-lightgold">Pure Mulberry Silk</p>
+                                <p class="text-[10px] text-gray-500">Warp Thread</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-green-400 bg-green-900/30 px-2 py-1 rounded border border-green-500/30">1.2 Kg</span>
+                    </div>
+                    
+                    <!-- Material 2 -->
+                    <div class="flex justify-between items-center bg-[#1a1a1a] p-3 rounded border border-brand-gold/10 hover:border-brand-gold/30 transition-colors">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded bg-yellow-900/20 flex items-center justify-center mr-3 border border-yellow-500/30">
+                                <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-brand-lightgold">24k Gold Zari</p>
+                                <p class="text-[10px] text-gray-500">Motif Inlay</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-orange-400 bg-orange-900/30 px-2 py-1 rounded border border-orange-500/30 animate-[pulse_1s_ease-in-out_infinite]">0.3 Kg</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-[110] flex flex-col gap-2"></div>
+
+<script src="{{ url_for('static', filename='artisan_app.js') }}"></script>
+<script>
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'bg-[#1a1a1a] border border-brand-gold text-brand-lightgold px-6 py-4 rounded shadow-[0_0_20px_rgba(212,175,55,0.2)] transform transition-all duration-300 translate-y-10 opacity-0 flex items-center text-sm font-bold tracking-wide z-[120]';
+    toast.innerHTML = `<svg class="w-5 h-5 mr-3 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ${message}`;
+    
+    document.getElementById('toast-container').appendChild(toast);
+    
+    setTimeout(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }, 10);
+    setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+function markJobCompleted(logId, btnElement) {
+    // Update UI immediately without reload
+    const row = btnElement.closest('tr');
+    
+    // Animate row
+    row.classList.add('bg-green-900/10');
+    setTimeout(() => row.classList.remove('bg-green-900/10'), 1000);
+    
+    // Update status badge
+    const statusCell = row.querySelector('td:nth-child(4)');
+    statusCell.innerHTML = '<span class="px-3 py-1 inline-flex text-[10px] leading-5 font-semibold rounded uppercase tracking-wider bg-green-900/40 text-green-400 border border-green-500/30">Completed</span>';
+    
+    // Update button to "Done"
+    const actionCell = row.querySelector('td:nth-child(5)');
+    actionCell.innerHTML = '<span class="text-xs text-brand-lightgold/30 italic">Done</span>';
+    
+    // Show toast
+    showToast("Job #" + logId + " marked as completed successfully!");
+    
+    // Send background request to actually update DB
+    fetch('/update_job_status/' + logId, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).catch(err => console.log(err));
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const brandGold = '#d4af37';
+    const brandLightGold = 'rgba(212, 175, 55, 0.4)';
+    const gridColor = 'rgba(212, 175, 55, 0.05)';
+    
+    // 1. Initialize Empty Monthly Earnings Chart
+    const earningsCtx = document.getElementById('earningsChart');
+    if (earningsCtx) {
+        window.earningsChartInstance = new Chart(earningsCtx, {
+            type: 'line',
+            data: { labels: [], datasets: [{
+                label: 'Earnings (₹)', data: [],
+                borderColor: brandGold, backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                borderWidth: 2, pointBackgroundColor: '#121212', pointBorderColor: brandGold,
+                fill: true, tension: 0.4
+            }]},
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: brandLightGold, font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { color: brandLightGold, font: { size: 10 } } }
+                }
+            }
+        });
+    }
+
+    // 2. Initialize Empty Production Progress Chart
+    const productionCtx = document.getElementById('productionChart');
+    if (productionCtx) {
+        window.productionChartInstance = new Chart(productionCtx, {
+            type: 'bar',
+            data: { labels: [], datasets: [
+                { label: 'Active Jobs', data: [], backgroundColor: brandLightGold, borderColor: brandGold, borderWidth: 1, barPercentage: 0.6 },
+                { label: 'Completed', data: [], backgroundColor: 'rgba(74, 222, 128, 0.2)', borderColor: 'rgba(74, 222, 128, 0.8)', borderWidth: 1, barPercentage: 0.6 }
+            ]},
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', labels: { color: brandLightGold, boxWidth: 12, font: { size: 10 } } } },
+                scales: {
+                    y: { stacked: true, beginAtZero: true, grid: { color: gridColor }, ticks: { color: brandLightGold, font: { size: 10 }, stepSize: 1 } },
+                    x: { stacked: true, grid: { display: false }, ticks: { color: brandLightGold, font: { size: 10 } } }
+                }
+            }
+        });
+    }
+    
+    // Fetch Dynamic Data from API
+    loadDashboardCharts();
+});
+</script>
+{% endblock %}

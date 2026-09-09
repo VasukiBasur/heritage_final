@@ -1,0 +1,18 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block header_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="glass-panel p-10 rounded-2xl border border-[#d4af37]/30 flex flex-col items-center justify-center text-center mt-12 shadow-2xl">
+    <div class="w-16 h-16 rounded-full bg-[#d4af37]/10 flex items-center justify-center mb-6">
+        <svg class="w-8 h-8 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+    </div>
+    <h2 class="text-3xl font-serif text-[#f5ebd7] glow-text mb-4">{{ title }}</h2>
+    <p class="text-gray-400 font-light max-w-md">This module is currently under active development. Enterprise features will be unlocked in the next deployment phase.</p>
+    
+    <button onclick="window.history.back()" class="mt-8 px-6 py-2 bg-[#1a1a1a] hover:bg-[#d4af37]/20 border border-[#d4af37]/30 rounded text-[#d4af37] transition-colors duration-300">
+        Return to Previous
+    </button>
+</div>
+{% endblock %}

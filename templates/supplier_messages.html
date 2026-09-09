@@ -1,0 +1,107 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Messages - Supplier Portal{% endblock %}
+{% block header_title %}Communication Hub{% endblock %}
+
+{% block content %}
+<div class="h-[calc(100vh-12rem)] flex gap-6 mt-4">
+    
+    <!-- Contacts Sidebar -->
+    <div class="w-1/3 bg-[#141414] border border-[#d4af37]/20 rounded-xl overflow-hidden flex flex-col shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+        <div class="p-4 border-b border-[#d4af37]/20 bg-[#1a1a1a]">
+            <input type="text" placeholder="Search conversations..." class="w-full bg-black/50 border border-[#d4af37]/30 rounded-lg px-4 py-2 text-[#f5ebd7] text-sm focus:outline-none focus:border-[#d4af37] transition-colors placeholder-[#d4af37]/50">
+        </div>
+        
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <!-- Contact 1 -->
+            <div class="p-4 border-b border-[#d4af37]/10 hover:bg-[#1a1a1a] cursor-pointer transition-colors flex items-center gap-3 bg-[#1a1a1a]/50 border-l-4 border-l-[#d4af37]">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4af37] to-[#b8860b] flex items-center justify-center text-black font-bold">
+                    AD
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-baseline">
+                        <h4 class="text-[#f5ebd7] text-sm font-semibold">Admin Desk</h4>
+                        <span class="text-[10px] text-[#d4af37]">10:42 AM</span>
+                    </div>
+                    <p class="text-xs text-[#d4af37]/70 truncate">Please confirm the dispatch for Hub A.</p>
+                </div>
+                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+            </div>
+            
+            <!-- Contact 2 -->
+            <div class="p-4 border-b border-[#d4af37]/10 hover:bg-[#1a1a1a] cursor-pointer transition-colors flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-800 border border-[#d4af37]/30 flex items-center justify-center text-[#d4af37] font-bold">
+                    LT
+                </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-baseline">
+                        <h4 class="text-[#f5ebd7]/80 text-sm font-semibold">Logistics Team</h4>
+                        <span class="text-[10px] text-[#d4af37]/50">Yesterday</span>
+                    </div>
+                    <p class="text-xs text-[#d4af37]/50 truncate">Fleet TRK-992 has reached the warehouse.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat Area -->
+    <div class="flex-1 bg-[#141414] border border-[#d4af37]/20 rounded-xl flex flex-col shadow-[0_0_20px_rgba(0,0,0,0.8)] relative overflow-hidden">
+        <!-- Chat Header -->
+        <div class="p-4 border-b border-[#d4af37]/20 bg-[#1a1a1a] flex items-center gap-3 z-10 relative">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4af37] to-[#b8860b] flex items-center justify-center text-black font-bold">
+                AD
+            </div>
+            <div>
+                <h3 class="text-[#f5ebd7] font-semibold text-sm">Admin Desk</h3>
+                <p class="text-[10px] text-green-400">Online</p>
+            </div>
+        </div>
+        
+        <!-- Chat Messages -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar relative z-10 bg-black/40">
+            <!-- Received -->
+            <div class="flex justify-start">
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/30 rounded-2xl rounded-tl-sm p-3 max-w-[70%] shadow-lg">
+                    <p class="text-sm text-[#f5ebd7]">Hello! We noticed a high demand prediction for silk sarees in the upcoming festival week. Can you increase logistics capacity by 20%?</p>
+                    <span class="text-[9px] text-[#d4af37]/50 block mt-2 text-right">09:15 AM</span>
+                </div>
+            </div>
+            
+            <!-- Sent -->
+            <div class="flex justify-end">
+                <div class="bg-gradient-to-br from-[#d4af37] to-[#b8860b] rounded-2xl rounded-tr-sm p-3 max-w-[70%] shadow-[0_0_15px_rgba(212,175,55,0.2)]">
+                    <p class="text-sm text-black font-medium">Yes, we have 3 extra trucks on standby. I will schedule them for the Northern Hub right away.</p>
+                    <span class="text-[9px] text-black/60 block mt-2 text-right">09:42 AM</span>
+                </div>
+            </div>
+            
+            <!-- Received -->
+            <div class="flex justify-start">
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/30 rounded-2xl rounded-tl-sm p-3 max-w-[70%] shadow-lg">
+                    <p class="text-sm text-[#f5ebd7]">Perfect. Please confirm the dispatch for Hub A once the schedule is locked.</p>
+                    <span class="text-[9px] text-[#d4af37]/50 block mt-2 text-right">10:42 AM</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Input -->
+        <div class="p-4 border-t border-[#d4af37]/20 bg-[#1a1a1a] z-10 relative">
+            <div class="flex gap-2">
+                <input type="text" placeholder="Type your message..." class="flex-1 bg-black/50 border border-[#d4af37]/30 rounded-full px-5 py-3 text-[#f5ebd7] text-sm focus:outline-none focus:border-[#d4af37] transition-colors placeholder-[#d4af37]/50">
+                <button onclick="alert('Message sent successfully!')" class="w-12 h-12 rounded-full bg-[#d4af37] hover:bg-[#b8860b] flex items-center justify-center transition-colors shadow-[0_0_10px_rgba(212,175,55,0.5)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-black transform rotate-45 -mt-1 -ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.2); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.4); }
+</style>
+{% endblock %}

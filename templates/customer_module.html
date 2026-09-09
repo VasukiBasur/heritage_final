@@ -1,0 +1,109 @@
+{% extends 'admin_base_layout.html' %}
+
+{% block title %}Customer
+
+{% endblock %}
+{% block header_title %}Customer Management{% endblock %}
+
+{% block content %}
+
+
+        <!-- Flash Messages -->
+        
+
+            <div class="flex justify-between items-center mb-8 border-b border-brand-gold/20 pb-4">
+                <h2 class="text-3xl font-serif font-bold text-brand-gold">Customer Management</h2>
+                <button onclick="document.getElementById('crud-modal').classList.remove('hidden')" class="bg-brand-gold text-brand-black px-4 py-2 rounded text-sm font-bold hover:bg-yellow-500 transition-colors shadow-lg shadow-brand-gold/20">+ Add New</button>
+            </div>
+            
+            <!-- Table Data -->
+            <div class="glass-card rounded-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Type</th><th>Location</th><th>Feedback</th>
+                        </tr></thead>
+                        <tbody>
+                            {% for c in customers %}
+                            <tr>
+                                <td>#{{ c.customer_id }}</td><td class='font-bold text-brand-gold'>{{ c.name }}</td><td>{{ c.email }}</td><td>{{ c.phone }}</td><td><span class='px-2 py-1 bg-blue-900/40 text-blue-300 border border-blue-500/30 rounded-full text-[10px] uppercase font-bold tracking-wider'>{{ c.buyer_type }}</span></td><td>{{ c.location }}</td><td class='text-xs italic opacity-70 truncate max-w-[150px]'>{{ c.feedback }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="7" class="text-center italic opacity-50 py-8">No records found. Click '+ Add New' to create one.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        
+
+
+    <!-- CRUD Modal -->
+    <div id="crud-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center">
+        <div class="bg-[#1a1a1a] border border-brand-gold/40 rounded-lg shadow-[0_0_40px_rgba(212,175,55,0.2)] w-full max-w-lg p-8 relative">
+            <button onclick="document.getElementById('crud-modal').classList.add('hidden')" class="absolute top-4 right-4 text-brand-gold/50 hover:text-brand-gold">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-2xl font-serif text-brand-gold mb-6">Add New Customer</h3>
+            <form action="/api/crud/customer/add" method="POST" class="space-y-4">
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Customer Name</label>
+                <input type="text" name="name" required class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none"></div>
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Email</label>
+                <input type="email" name="email" class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none"></div>
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Phone</label>
+                <input type="text" name="phone" class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none"></div>
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Buyer Type</label>
+                <select name="buyer_type" class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none">
+                    <option value="Retail">Retail</option><option value="Wholesale">Wholesale</option><option value="Exporter">Exporter</option>
+                </select></div>
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Location</label>
+                <input type="text" name="location" class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none"></div>
+                <div class="pt-4"><button type="submit" class="w-full bg-brand-gold text-brand-black font-bold py-3 rounded hover:bg-yellow-500 transition-colors">Save Customer</button></div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInputs = document.querySelectorAll('input[type="text"][placeholder*="Search"]');
+            searchInputs.forEach(searchInput => {
+                searchInput.addEventListener("input", function(e) {
+                    const query = e.target.value.toLowerCase();
+                    
+                    // Filter Table Rows
+                    const tables = document.querySelectorAll("table tbody");
+                    tables.forEach(tbody => {
+                        const rows = tbody.querySelectorAll("tr");
+                        rows.forEach(row => {
+                            if (row.innerText.toLowerCase().includes(query)) {
+                                row.style.display = "";
+                            } else {
+                                row.style.display = "none";
+                            }
+                        });
+                    });
+
+                    // Filter Glass Cards (for Modules like Designs/Materials)
+                    const cards = document.querySelectorAll(".glass-card");
+                    cards.forEach(card => {
+                        // Avoid filtering structural glass cards (like dashboard charts)
+                        if (card.parentElement && card.parentElement.tagName === 'BODY') return;
+                        if (card.querySelector('canvas')) return; // ignore charts
+                        
+                        // Only filter if it's likely a grid card
+                        if (card.innerText.toLowerCase().includes(query)) {
+                            if(card.parentElement && card.parentElement.style) card.parentElement.style.display = "block";
+                            card.style.display = "block";
+                        } else {
+                            if(card.parentElement && card.parentElement.style && card.parentElement.tagName !== 'DIV') card.parentElement.style.display = "none";
+                            card.style.display = "none";
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

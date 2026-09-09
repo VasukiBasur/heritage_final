@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Product - Heritage Handloom</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { black: '#121212', dark: '#1a1a1a', brown: '#3e2723', gold: '#d4af37', lightgold: '#f0e6d2' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-black text-brand-lightgold font-sans min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-md w-full bg-brand-dark border border-brand-gold/30 rounded-lg shadow-2xl overflow-hidden">
+        <div class="h-48 w-full bg-brand-black relative">
+            <img src="{{ url_for('static', filename='uploads/' ~ log.design_image) }}" alt="Design" class="w-full h-full object-cover opacity-80">
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark to-transparent"></div>
+            <div class="absolute bottom-4 left-6">
+                <h1 class="text-3xl font-serif font-bold text-brand-gold tracking-wide">{{ log.design_name }}</h1>
+            </div>
+        </div>
+        <div class="p-8">
+            <div class="mb-8">
+                <p class="text-sm text-brand-lightgold/70 uppercase tracking-widest mb-1">Authenticity ID</p>
+                <p class="text-lg font-mono text-gray-300">#{{ log.log_id }}</p>
+            </div>
+            
+            <div class="mb-8 border-l-2 border-brand-gold pl-4">
+                <p class="text-sm text-brand-lightgold/70 uppercase tracking-widest mb-1">Master Artisan</p>
+                <p class="text-xl font-medium text-white">{{ log.artisan_name }}</p>
+            </div>
+
+            <div class="mb-6">
+                <p class="text-sm text-brand-lightgold/70 uppercase tracking-widest mb-4">Supply Chain Stage</p>
+                <div class="bg-brand-black border border-brand-gold/20 rounded-md p-4 flex items-center space-x-4">
+                    <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-lg font-semibold text-brand-gold">{{ log.supply_chain_stage }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="bg-brand-black p-4 text-center border-t border-brand-gold/20">
+            <p class="text-xs text-brand-lightgold/50 tracking-wide">Heritage Handloom Authenticity Tracker</p>
+        </div>
+    </div>
+
+    <!-- Advanced Floating AI Chatbot -->
+    <div id="ai-chat-widget" class="fixed bottom-6 right-6 z-[9999] font-sans shadow-2xl">
+        <button id="chat-toggle-btn" class="w-16 h-16 bg-brand-dark border-[3px] border-brand-gold rounded-full shadow-[0_0_20px_rgba(212,175,55,0.4)] flex items-center justify-center text-brand-gold hover:bg-brand-gold hover:text-brand-black transition-all duration-300 transform hover:scale-110 relative group">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+            <span class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse shadow-lg border border-brand-dark">1</span>
+        </button>
+        
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-96 h-[500px] bg-brand-dark/95 backdrop-blur-xl border border-brand-gold/50 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden transition-all duration-300 transform origin-bottom-right">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-brand-black to-brand-dark border-b border-brand-gold/30 px-6 py-4 flex justify-between items-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-brand-gold/5 animate-pulse"></div>
+                <div class="flex items-center space-x-3 relative z-10">
+                    <div class="relative">
+                        <div class="w-3 h-3 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] border-2 border-brand-dark"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-brand-gold font-serif font-bold text-lg leading-none">Handloom Oracle</h3>
+                        <p class="text-xs text-brand-lightgold/50 mt-1">Advanced Supply Chain AI</p>
+                    </div>
+                </div>
+                <button id="chat-close-btn" class="text-brand-lightgold/50 hover:text-brand-gold transition-colors relative z-10 p-1 hover:bg-brand-gold/10 rounded-full">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="px-4 py-3 border-b border-brand-gold/10 bg-brand-black/50 flex space-x-2 overflow-x-auto scrollbar-hide">
+                <button type="button" class="quick-action-btn whitespace-nowrap text-[11px] bg-brand-gold/10 text-brand-gold border border-brand-gold/30 px-3 py-1.5 rounded-full hover:bg-brand-gold hover:text-brand-black transition-colors font-semibold">Check Inventory</button>
+                <button type="button" class="quick-action-btn whitespace-nowrap text-[11px] bg-brand-gold/10 text-brand-gold border border-brand-gold/30 px-3 py-1.5 rounded-full hover:bg-brand-gold hover:text-brand-black transition-colors font-semibold">Active Artisans</button>
+                <button type="button" class="quick-action-btn whitespace-nowrap text-[11px] bg-brand-gold/10 text-brand-gold border border-brand-gold/30 px-3 py-1.5 rounded-full hover:bg-brand-gold hover:text-brand-black transition-colors font-semibold">Pending Exports</button>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="chat-messages" class="flex-grow p-6 overflow-y-auto space-y-4 bg-transparent text-sm text-brand-lightgold scroll-smooth">
+                <div class="flex justify-start items-end space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-brand-gold flex items-center justify-center text-brand-black font-serif font-bold text-xs shadow-lg shrink-0">AI</div>
+                    <div class="bg-brand-black border border-brand-gold/20 rounded-2xl rounded-bl-sm px-4 py-3 max-w-[80%] shadow-md leading-relaxed">
+                        Namaskara! I am the Handloom Oracle. I continuously monitor the global supply chain, raw material levels, and artisan payouts. How may I assist your operations today?
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="p-4 bg-brand-black border-t border-brand-gold/30">
+                <form id="chat-form" class="flex items-center space-x-3" onsubmit="event.preventDefault(); return false;">
+                    <div class="relative flex-grow">
+                        <input type="text" id="chat-input" placeholder="Query the Oracle..." class="w-full bg-brand-dark/50 text-brand-lightgold border border-brand-gold/30 rounded-full pl-4 pr-10 py-3 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold text-sm shadow-inner transition-all placeholder-brand-lightgold/30" autocomplete="off">
+                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center">
+                            <div class="w-1.5 h-1.5 bg-brand-gold rounded-full animate-ping"></div>
+                        </div>
+                    </div>
+                    <button type="button" id="chat-submit-btn" class="bg-brand-gold text-brand-black hover:bg-yellow-400 p-3 rounded-full transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.4)] transform hover:scale-105 shrink-0">
+                        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.advancedChatInitialized) return;
+            window.advancedChatInitialized = true;
+            
+            const chatWidget = document.getElementById('ai-chat-widget');
+            if (!chatWidget) return;
+            
+            const toggleBtn = document.getElementById('chat-toggle-btn');
+            const closeBtn = document.getElementById('chat-close-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatForm = document.getElementById('chat-form');
+            const chatSubmitBtn = document.getElementById('chat-submit-btn');
+            const chatInput = document.getElementById('chat-input');
+            const chatMessages = document.getElementById('chat-messages');
+            const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+            
+            toggleBtn.addEventListener('click', () => {
+                chatWindow.classList.toggle('hidden');
+                const badge = toggleBtn.querySelector('span');
+                if (badge) badge.remove();
+                if (!chatWindow.classList.contains('hidden')) {
+                    setTimeout(() => chatInput.focus(), 100);
+                }
+            });
+            
+            closeBtn.addEventListener('click', () => {
+                chatWindow.classList.add('hidden');
+            });
+            
+            quickActionBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    chatInput.value = btn.innerText;
+                    submitChat();
+                });
+            });
+            
+            function appendUserMessage(msg) {
+                const div = document.createElement('div');
+                div.className = 'flex justify-end items-end space-x-2 animate-fade-in-up';
+                div.innerHTML = `
+                    <div class="bg-gradient-to-br from-brand-gold to-yellow-600 text-brand-black font-medium rounded-2xl rounded-br-sm px-4 py-3 max-w-[80%] shadow-lg leading-relaxed">${msg}</div>
+                    <div class="w-6 h-6 rounded-full bg-brand-dark border border-brand-gold/50 flex items-center justify-center text-[10px] font-bold text-brand-gold shrink-0">ME</div>
+                `;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function appendTypingIndicator() {
+                const div = document.createElement('div');
+                div.id = 'typing-indicator';
+                div.className = 'flex justify-start items-end space-x-2 animate-fade-in-up';
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-brand-gold flex items-center justify-center text-brand-black font-serif font-bold text-xs shadow-lg shrink-0">AI</div>
+                    <div class="bg-brand-black border border-brand-gold/20 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[80%] shadow-md flex space-x-1">
+                        <div class="w-2 h-2 bg-brand-gold/70 rounded-full animate-bounce"></div>
+                        <div class="w-2 h-2 bg-brand-gold/70 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-2 h-2 bg-brand-gold/70 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    </div>
+                `;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return div;
+            }
+            
+            function appendBotMessage(msg) {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.remove();
+                
+                const div = document.createElement('div');
+                div.className = 'flex justify-start items-end space-x-2 animate-fade-in-up';
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-brand-gold flex items-center justify-center text-brand-black font-serif font-bold text-xs shadow-lg shrink-0">AI</div>
+                    <div class="bg-brand-black border border-brand-gold/20 rounded-2xl rounded-bl-sm px-4 py-3 max-w-[80%] shadow-md leading-relaxed">
+                        ${msg}
+                    </div>
+                `;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function submitChat() {
+                const msg = chatInput.value.trim();
+                if (!msg) return;
+                
+                appendUserMessage(msg);
+                chatInput.value = '';
+                appendTypingIndicator();
+                
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({text: msg.toLowerCase()}),
+                })
+                .then(r => r.json())
+                .then(data => setTimeout(() => appendBotMessage(data.reply), 800))
+                .catch(e => setTimeout(() => appendBotMessage("Connection to Oracle lost. Please check your network."), 800));
+            }
+            
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                submitChat();
+            });
+            chatSubmitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                submitChat();
+            });
+            
+            // Add custom animation styles dynamically
+            if (!document.getElementById('chatbot-styles')) {
+                const style = document.createElement('style');
+                style.id = 'chatbot-styles';
+                style.textContent = `
+                    @keyframes fadeInUp {
+                        from { opacity: 0; transform: translateY(10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+                    .scrollbar-hide::-webkit-scrollbar { display: none; }
+                    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+                `;
+                document.head.appendChild(style);
+            }
+        });
+    </script>
+
+
+    <!-- Universal Search Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInputs = document.querySelectorAll('input[type="text"][placeholder*="Search"]');
+            searchInputs.forEach(searchInput => {
+                searchInput.addEventListener("input", function(e) {
+                    const query = e.target.value.toLowerCase();
+                    
+                    // Filter Table Rows
+                    const tables = document.querySelectorAll("table tbody");
+                    tables.forEach(tbody => {
+                        const rows = tbody.querySelectorAll("tr");
+                        rows.forEach(row => {
+                            if (row.innerText.toLowerCase().includes(query)) {
+                                row.style.display = "";
+                            } else {
+                                row.style.display = "none";
+                            }
+                        });
+                    });
+
+                    // Filter Glass Cards (for Modules like Designs/Materials)
+                    const cards = document.querySelectorAll(".glass-card");
+                    cards.forEach(card => {
+                        // Avoid filtering structural glass cards (like dashboard charts)
+                        if (card.parentElement && card.parentElement.tagName === 'BODY') return;
+                        if (card.querySelector('canvas')) return; // ignore charts
+                        
+                        // Only filter if it's likely a grid card
+                        if (card.innerText.toLowerCase().includes(query)) {
+                            if(card.parentElement && card.parentElement.style) card.parentElement.style.display = "block";
+                            card.style.display = "block";
+                        } else {
+                            if(card.parentElement && card.parentElement.style && card.parentElement.tagName !== 'DIV') card.parentElement.style.display = "none";
+                            card.style.display = "none";
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

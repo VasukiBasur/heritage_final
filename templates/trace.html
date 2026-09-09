@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provenance Trace - Heritage Handloom</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { black: '#121212', dark: '#1a1a1a', brown: '#3e2723', gold: '#d4af37', lightgold: '#f0e6d2' } },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-black text-brand-lightgold font-sans antialiased min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-brand-dark border border-brand-gold/30 rounded-xl shadow-2xl overflow-hidden">
+        <div class="bg-brand-gold p-6 text-center text-brand-black relative">
+            <svg class="w-12 h-12 mx-auto mb-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            <h1 class="text-2xl font-serif font-bold uppercase tracking-widest">Verified Authentic</h1>
+            <p class="text-xs font-semibold mt-1 opacity-80">Heritage Handloom BlockChain</p>
+        </div>
+        
+        <div class="p-6">
+            <h2 class="text-3xl font-serif text-brand-gold mb-2">{{ product.product_name }}</h2>
+            <p class="text-sm opacity-70 mb-6 border-b border-brand-gold/20 pb-4">Category: {{ product.category }} &bull; Value: ₹{{ product.price }}</p>
+            
+            <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-brand-gold/50 before:via-brand-gold/50 before:to-transparent">
+                
+                <!-- Timeline Item 1 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-brand-gold text-brand-black shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded bg-brand-black border border-brand-gold/20 shadow">
+                        <div class="flex items-center justify-between space-x-2 mb-1">
+                            <div class="font-bold text-brand-gold text-sm">Crafted By</div>
+                        </div>
+                        <div class="text-brand-lightgold font-serif text-lg">{{ provenance.artisan_name }}</div>
+                        <div class="text-xs opacity-60">Master Weaver</div>
+                    </div>
+                </div>
+                
+                <!-- Timeline Item 2 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-brand-gold text-brand-black shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded bg-brand-black border border-brand-gold/20 shadow">
+                        <div class="flex items-center justify-between space-x-2 mb-1">
+                            <div class="font-bold text-brand-gold text-sm">Origin</div>
+                        </div>
+                        <div class="text-brand-lightgold font-serif text-lg">{{ provenance.location }}</div>
+                        <div class="text-xs opacity-60">Handloom Cluster</div>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 3 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-brand-gold text-brand-black shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded bg-brand-black border border-brand-gold/20 shadow">
+                        <div class="flex items-center justify-between space-x-2 mb-1">
+                            <div class="font-bold text-brand-gold text-sm">Materials & Design</div>
+                        </div>
+                        <div class="text-brand-lightgold font-serif text-lg">{{ provenance.material_type }}</div>
+                        <div class="text-xs opacity-60">{{ provenance.design_name }}</div>
+                    </div>
+                </div>
+
+
+                <!-- Timeline Item 4 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-brand-gold text-brand-black shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded bg-brand-black border border-brand-gold/20 shadow">
+                        <div class="flex items-center justify-between space-x-2 mb-1">
+                            <div class="font-bold text-brand-gold text-sm">Quality Assurance</div>
+                        </div>
+                        <div class="text-brand-lightgold font-serif text-lg">Govt. Handloom Mark</div>
+                        <div class="text-xs opacity-60">Verified Authentic Handwoven Product</div>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 5 -->
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-brand-gold text-brand-black shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded bg-brand-black border border-brand-gold/20 shadow">
+                        <div class="flex items-center justify-between space-x-2 mb-1">
+                            <div class="font-bold text-brand-gold text-sm">Fair Trade Status</div>
+                        </div>
+                        <div class="text-brand-lightgold font-serif text-lg">Ethically Sourced</div>
+                        <div class="text-xs opacity-60">100% Payout Distributed to Artisan</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <p class="text-[10px] opacity-40">Scanned at {{ range(1000, 9999) | random }} &bull; Heritage Handloom ERP</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Universal Search Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInputs = document.querySelectorAll('input[type="text"][placeholder*="Search"]');
+            searchInputs.forEach(searchInput => {
+                searchInput.addEventListener("input", function(e) {
+                    const query = e.target.value.toLowerCase();
+                    
+                    // Filter Table Rows
+                    const tables = document.querySelectorAll("table tbody");
+                    tables.forEach(tbody => {
+                        const rows = tbody.querySelectorAll("tr");
+                        rows.forEach(row => {
+                            if (row.innerText.toLowerCase().includes(query)) {
+                                row.style.display = "";
+                            } else {
+                                row.style.display = "none";
+                            }
+                        });
+                    });
+
+                    // Filter Glass Cards (for Modules like Designs/Materials)
+                    const cards = document.querySelectorAll(".glass-card");
+                    cards.forEach(card => {
+                        // Avoid filtering structural glass cards (like dashboard charts)
+                        if (card.parentElement && card.parentElement.tagName === 'BODY') return;
+                        if (card.querySelector('canvas')) return; // ignore charts
+                        
+                        // Only filter if it's likely a grid card
+                        if (card.innerText.toLowerCase().includes(query)) {
+                            if(card.parentElement && card.parentElement.style) card.parentElement.style.display = "block";
+                            card.style.display = "block";
+                        } else {
+                            if(card.parentElement && card.parentElement.style && card.parentElement.tagName !== 'DIV') card.parentElement.style.display = "none";
+                            card.style.display = "none";
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

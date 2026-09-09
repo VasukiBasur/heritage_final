@@ -1,0 +1,211 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Profile Settings{% endblock %}
+{% block header_title %}Account Management{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-3xl font-serif text-brand-gold">Profile Settings</h2>
+        <p class="text-sm text-brand-lightgold/50 mt-1">Manage your personal information, weaving credentials, and security settings.</p>
+    </div>
+    <button onclick="saveProfile()" class="bg-brand-gold hover:bg-yellow-500 text-brand-black font-bold uppercase tracking-widest py-3 px-6 rounded-sm transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] text-sm flex items-center transform hover:-translate-y-1">
+        Save Changes
+    </button>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Column: Profile Card -->
+    <div class="lg:col-span-1 space-y-6">
+        <div class="glass-card rounded overflow-hidden p-6 border-t-4 border-brand-gold flex flex-col items-center text-center">
+            <div class="relative mb-4 group cursor-pointer">
+                <img src="{{ url_for('static', filename='images/weaver.png') }}" alt="Artisan Profile" class="w-32 h-32 rounded-full border-4 border-brand-gold/30 object-cover group-hover:border-brand-gold transition-colors shadow-lg">
+                <div class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+            </div>
+            <h3 id="display-name" class="text-xl font-serif text-brand-gold">K. Ramanathan</h3>
+            <p class="text-sm text-brand-lightgold/70">Master Weaver</p>
+            <span class="mt-2 bg-green-900/40 text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30">Verified Artisan</span>
+            
+            <div class="w-full mt-6 pt-6 border-t border-brand-gold/10 text-left">
+                <div class="mb-3">
+                    <span class="text-xs text-brand-lightgold/50 uppercase tracking-widest block mb-1">Joined</span>
+                    <span class="text-sm text-gray-300 font-mono">March 2024</span>
+                </div>
+                <div class="mb-3">
+                    <span class="text-xs text-brand-lightgold/50 uppercase tracking-widest block mb-1">Total Products Woven</span>
+                    <span class="text-sm text-brand-gold font-bold">142 Items</span>
+                </div>
+                <div>
+                    <span class="text-xs text-brand-lightgold/50 uppercase tracking-widest block mb-1">Location</span>
+                    <span class="text-sm text-gray-300">Mysore, Karnataka, India</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Settings Form -->
+    <div class="lg:col-span-2 space-y-6">
+        <div class="glass-card rounded overflow-hidden">
+            <div class="px-8 py-4 border-b border-brand-gold/10 bg-brand-black/40 flex space-x-6">
+                <button onclick="switchTab('personal')" id="tab-personal" class="tab-btn text-brand-gold font-bold uppercase tracking-widest text-sm border-b-2 border-brand-gold pb-2">Personal Info</button>
+                <button onclick="switchTab('bank')" id="tab-bank" class="tab-btn text-brand-lightgold/50 hover:text-brand-lightgold font-bold uppercase tracking-widest text-sm pb-2 transition-colors border-b-2 border-transparent">Bank Details</button>
+                <button onclick="switchTab('security')" id="tab-security" class="tab-btn text-brand-lightgold/50 hover:text-brand-lightgold font-bold uppercase tracking-widest text-sm pb-2 transition-colors border-b-2 border-transparent">Security</button>
+            </div>
+            
+            <form id="form-personal" class="tab-content p-8 space-y-6" onsubmit="event.preventDefault(); saveProfile();">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Full Name</label>
+                        <input id="input-name" type="text" value="K. Ramanathan" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Email Address</label>
+                        <input id="input-email" type="email" value="k.ramanathan.artisan@heritage.in" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors opacity-70" readonly>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Phone Number</label>
+                        <input id="input-phone" type="tel" value="+91 98765 43210" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Specialization</label>
+                        <select class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                            <option value="silk">Silk Weaving (Mysore/Kanchipuram)</option>
+                            <option value="cotton">Cotton & Block Print</option>
+                            <option value="wool">Pashmina & Wool</option>
+                            <option value="zari">Zari Embroidery</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Weaving Unit Address</label>
+                    <textarea id="input-address" rows="3" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">14/2 Heritage Weavers Colony, Silk Board Road, Mysore, Karnataka 570001</textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Artisan Bio (Shown to Customers via QR)</label>
+                    <textarea rows="4" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">A 3rd generation master weaver specializing in pure Mysore silk and real gold zari work. With over 25 years of experience at the loom, every piece crafted carries the legacy of the royal weaving courts.</textarea>
+                </div>
+            </form>
+
+            <form id="form-bank" class="tab-content hidden p-8 space-y-6" onsubmit="event.preventDefault(); saveProfile();">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Account Holder Name</label>
+                        <input type="text" value="K. Ramanathan" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Bank Name</label>
+                        <input type="text" value="State Bank of India" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Account Number</label>
+                        <input type="password" value="30000000000" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">IFSC Code</label>
+                        <input type="text" value="SBIN0001234" class="w-full bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                    </div>
+                </div>
+            </form>
+
+            <form id="form-security" class="tab-content hidden p-8 space-y-6" onsubmit="event.preventDefault(); saveProfile();">
+                <div>
+                    <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Current Password</label>
+                    <input type="password" placeholder="Enter current password" class="w-full max-w-md bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">New Password</label>
+                    <input type="password" placeholder="Enter new password" class="w-full max-w-md bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs text-brand-lightgold/50 uppercase tracking-widest mb-2">Confirm New Password</label>
+                    <input type="password" placeholder="Confirm new password" class="w-full max-w-md bg-brand-black border border-brand-gold/30 rounded p-3 text-brand-lightgold text-sm focus:border-brand-gold focus:outline-none transition-colors">
+                </div>
+                <div class="pt-4 border-t border-brand-gold/10">
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" checked class="form-checkbox h-5 w-5 text-brand-gold bg-brand-black border-brand-gold/30 rounded focus:ring-brand-gold focus:ring-offset-0">
+                        <span class="text-sm text-brand-lightgold">Enable Two-Factor Authentication (2FA)</span>
+                    </label>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-[110] flex flex-col gap-2"></div>
+
+<script>
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'bg-[#1a1a1a] border border-brand-gold text-brand-lightgold px-6 py-4 rounded shadow-[0_0_20px_rgba(212,175,55,0.2)] transform transition-all duration-300 translate-y-10 opacity-0 flex items-center text-sm font-bold tracking-wide';
+    toast.innerHTML = `<svg class="w-5 h-5 mr-3 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> ${message}`;
+    
+    document.getElementById('toast-container').appendChild(toast);
+    
+    setTimeout(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }, 10);
+    setTimeout(() => { toast.classList.add('translate-y-10', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+function saveProfile() {
+    const name = document.getElementById('input-name').value;
+    const phone = document.getElementById('input-phone').value;
+    const address = document.getElementById('input-address').value;
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('weaverProfile', JSON.stringify({
+        name: name,
+        phone: phone,
+        address: address
+    }));
+    
+    // Update display immediately
+    document.getElementById('display-name').innerText = name;
+    
+    showToast("Profile details updated successfully!");
+}
+
+// Load saved data on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('weaverProfile');
+    if (saved) {
+        const data = JSON.parse(saved);
+        if(data.name) {
+            document.getElementById('input-name').value = data.name;
+            document.getElementById('display-name').innerText = data.name;
+        }
+        if(data.phone) document.getElementById('input-phone').value = data.phone;
+        if(data.address) document.getElementById('input-address').value = data.address;
+    }
+});
+
+function switchTab(tabId) {
+    // Hide all forms
+    document.querySelectorAll('.tab-content').forEach(el => {
+        el.classList.add('hidden');
+    });
+    
+    // Reset all tabs
+    document.querySelectorAll('.tab-btn').forEach(el => {
+        el.className = 'tab-btn text-brand-lightgold/50 hover:text-brand-lightgold font-bold uppercase tracking-widest text-sm pb-2 transition-colors border-b-2 border-transparent';
+    });
+    
+    // Show selected form
+    const form = document.getElementById(`form-${tabId}`);
+    form.classList.remove('hidden');
+    form.classList.add('animate-[fadeIn_0.3s_ease-out]');
+    
+    // Highlight selected tab
+    const activeTab = document.getElementById(`tab-${tabId}`);
+    activeTab.className = 'tab-btn text-brand-gold font-bold uppercase tracking-widest text-sm border-b-2 border-brand-gold pb-2 transition-colors';
+}
+</script>
+{% endblock %}

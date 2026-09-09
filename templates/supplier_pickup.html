@@ -1,0 +1,604 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Pickup Requests{% endblock %}
+{% block header_title %}Pickup Logistics{% endblock %}
+
+{% block content %}
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.6); }
+</style>
+
+<div class="mb-8 flex justify-between items-end">
+    <div>
+        <h2 class="text-4xl font-serif text-[#f5ebd7] drop-shadow-md">Pickup Requests</h2>
+        <p class="text-sm text-[#d4af37]/70 mt-2 tracking-wide font-light">Manage and assign incoming production pickups from artisans.</p>
+    </div>
+    <div class="flex space-x-4">
+        <select id="location-filter" onchange="filterRows()" class="bg-[#1a1a1a] border border-[#d4af37]/30 text-[#f5ebd7] text-xs font-semibold uppercase tracking-widest py-2.5 px-4 rounded-md focus:outline-none focus:border-[#d4af37] shadow-lg cursor-pointer">
+            <option value="all">All Locations</option>
+            <option value="Mysore Hub">Mysore Hub</option>
+            <option value="Udupi Center">Udupi Center</option>
+            <option value="Hubli Zone">Hubli Zone</option>
+            <option value="Bangalore South">Bangalore South</option>
+            <option value="Shivamogga Hub">Shivamogga Hub</option>
+        </select>
+        <div class="relative flex items-center">
+            <svg class="w-4 h-4 text-[#d4af37] absolute left-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+            <input type="date" id="date-filter" onchange="filterRows()" class="bg-[#2a1a1a] border border-[#8b4513]/50 text-[#f5ebd7] font-semibold uppercase tracking-widest py-2.5 pl-10 pr-4 rounded-md hover:bg-[#8b4513]/20 transition-all shadow-lg text-xs focus:outline-none focus:border-[#d4af37] cursor-pointer custom-scrollbar">
+        </div>
+    </div>
+</div>
+
+<div class="bg-[#141414] rounded-xl border border-[#d4af37]/20 shadow-2xl overflow-hidden mb-10">
+    <div class="p-6 border-b border-[#d4af37]/10 flex justify-between items-center bg-gradient-to-r from-[#1a1a1a] to-[#0a0a0a]">
+        <div class="flex space-x-6" id="tab-buttons">
+            <button onclick="switchTab('pending')" id="tab-btn-pending" class="text-[#d4af37] border-b-2 border-[#d4af37] pb-1 font-semibold uppercase tracking-widest text-xs transition-colors">Pending (6)</button>
+            <button onclick="switchTab('assigned')" id="tab-btn-assigned" class="text-[#f5ebd7]/40 hover:text-[#f5ebd7] pb-1 font-semibold uppercase tracking-widest text-xs transition-colors border-b-2 border-transparent">Assigned (5)</button>
+            <button onclick="switchTab('completed')" id="tab-btn-completed" class="text-[#f5ebd7]/40 hover:text-[#f5ebd7] pb-1 font-semibold uppercase tracking-widest text-xs transition-colors border-b-2 border-transparent">Completed (5)</button>
+        </div>
+    </div>
+    
+    <div class="p-6 overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-[#d4af37]/50 text-[10px] uppercase tracking-widest border-b border-[#d4af37]/10">
+                    <th class="pb-4 font-semibold px-4">Tracking ID</th>
+                    <th class="pb-4 font-semibold px-4">Artisan Details</th>
+                    <th class="pb-4 font-semibold px-4">Location</th>
+                    <th class="pb-4 font-semibold px-4">Cargo Info</th>
+                    <th class="pb-4 font-semibold px-4">Window</th>
+                    <th class="pb-4 font-semibold px-4 text-right">Actions / Status</th>
+                </tr>
+            </thead>
+            
+            <!-- PENDING TAB BODY -->
+            <tbody id="tab-pending" class="text-sm text-[#f5ebd7] divide-y divide-[#d4af37]/10 transition-opacity duration-300">
+                <tr class="hover:bg-white/5 transition-colors group" id="req-1">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8842</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#800000] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">RK</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Ramesh Kumar</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-204</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Shivamogga Hub</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 max-w-[150px] truncate">124 Weavers Colony, Phase 2</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">12x Silk Sarees</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 14 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#ff9999]">Oct 24, 2026</p>
+                        <p class="text-[10px] text-[#ff9999]/80 mt-0.5">10:00 AM - 12:00 PM</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <div class="flex justify-end space-x-2 opacity-100 lg:opacity-50 group-hover:opacity-100 transition-opacity">
+                            <button onclick="handleAction('req-1', 'accept')" class="px-4 py-2 bg-green-900/20 text-green-400 hover:bg-green-900/50 hover:text-green-300 rounded border border-green-500/30 transition-colors text-[10px] font-bold uppercase tracking-widest shadow-lg">Assign</button>
+                            <button onclick="handleAction('req-1', 'reject')" class="p-2 bg-red-900/20 text-red-400 hover:bg-red-900/50 rounded border border-red-500/30 transition-colors" title="Reject"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group" id="req-2">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8843</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#8b4513] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">LD</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Lakshmi Devi</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-912</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Mysore Silk Coop</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 max-w-[150px] truncate">Block B, Industrial Area</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">45x Cotton Stoles</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 28 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 25, 2026</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">02:00 PM - 04:00 PM</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <div class="flex justify-end space-x-2 opacity-100 lg:opacity-50 group-hover:opacity-100 transition-opacity">
+                            <button onclick="handleAction('req-2', 'accept')" class="px-4 py-2 bg-green-900/20 text-green-400 hover:bg-green-900/50 hover:text-green-300 rounded border border-green-500/30 transition-colors text-[10px] font-bold uppercase tracking-widest shadow-lg">Assign</button>
+                            <button onclick="handleAction('req-2', 'reject')" class="p-2 bg-red-900/20 text-red-400 hover:bg-red-900/50 rounded border border-red-500/30 transition-colors" title="Reject"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group" id="req-3">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8844</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#1a1a1a] text-[#d4af37] flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">SK</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Syed Khaleel</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-334</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Ilkal Center</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 max-w-[150px] truncate">Main Bazaar Road</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">8x Zari Borders</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 2 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 26, 2026</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">09:00 AM - 11:00 AM</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <div class="flex justify-end space-x-2 opacity-100 lg:opacity-50 group-hover:opacity-100 transition-opacity">
+                            <button onclick="handleAction('req-3', 'accept')" class="px-4 py-2 bg-green-900/20 text-green-400 hover:bg-green-900/50 hover:text-green-300 rounded border border-green-500/30 transition-colors text-[10px] font-bold uppercase tracking-widest shadow-lg">Assign</button>
+                            <button onclick="handleAction('req-3', 'reject')" class="p-2 bg-red-900/20 text-red-400 hover:bg-red-900/50 rounded border border-red-500/30 transition-colors" title="Reject"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group" id="req-4">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8845</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#333] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">PP</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Parvati Patil</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-501</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Hubli Zone</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 max-w-[150px] truncate">Sector 4, Textile Park</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">20x Kasuti Embroidery</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 18 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 26, 2026</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">02:00 PM - 05:00 PM</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <div class="flex justify-end space-x-2 opacity-100 lg:opacity-50 group-hover:opacity-100 transition-opacity">
+                            <button onclick="handleAction('req-4', 'accept')" class="px-4 py-2 bg-green-900/20 text-green-400 hover:bg-green-900/50 hover:text-green-300 rounded border border-green-500/30 transition-colors text-[10px] font-bold uppercase tracking-widest shadow-lg">Assign</button>
+                            <button onclick="handleAction('req-4', 'reject')" class="p-2 bg-red-900/20 text-red-400 hover:bg-red-900/50 rounded border border-red-500/30 transition-colors" title="Reject"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group" id="req-5">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8846</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#5a0000] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">VJ</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Vijay Jha</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-909</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Bangalore South</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 max-w-[150px] truncate">19th Main, Jayanagar</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">50x Handwoven Towels</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 10 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 27, 2026</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">10:00 AM - 01:00 PM</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <div class="flex justify-end space-x-2 opacity-100 lg:opacity-50 group-hover:opacity-100 transition-opacity">
+                            <button onclick="handleAction('req-5', 'accept')" class="px-4 py-2 bg-green-900/20 text-green-400 hover:bg-green-900/50 hover:text-green-300 rounded border border-green-500/30 transition-colors text-[10px] font-bold uppercase tracking-widest shadow-lg">Assign</button>
+                            <button onclick="handleAction('req-5', 'reject')" class="p-2 bg-red-900/20 text-red-400 hover:bg-red-900/50 rounded border border-red-500/30 transition-colors" title="Reject"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group" id="req-6">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8847</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#141414] text-[#d4af37] flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">AA</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Ananya Acharya</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-112</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Udupi Center</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 max-w-[150px] truncate">Malpe Road, Block C</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">5x Premium Kanjeevaram</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 8 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 27, 2026</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">04:00 PM - 06:00 PM</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <div class="flex justify-end space-x-2 opacity-100 lg:opacity-50 group-hover:opacity-100 transition-opacity">
+                            <button onclick="handleAction('req-6', 'accept')" class="px-4 py-2 bg-green-900/20 text-green-400 hover:bg-green-900/50 hover:text-green-300 rounded border border-green-500/30 transition-colors text-[10px] font-bold uppercase tracking-widest shadow-lg">Assign</button>
+                            <button onclick="handleAction('req-6', 'reject')" class="p-2 bg-red-900/20 text-red-400 hover:bg-red-900/50 rounded border border-red-500/30 transition-colors" title="Reject"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+
+            <!-- ASSIGNED TAB BODY (Hidden by default) -->
+            <tbody id="tab-assigned" class="text-sm text-[#f5ebd7] divide-y divide-[#d4af37]/10 hidden transition-opacity duration-300">
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8835</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#1a1a1a] text-[#d4af37] flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">SG</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Srinivas Gowda</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-401</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Mysore Hub</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">40x Cotton Sarees</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 25 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 23, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30">Assigned: Truck A</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8836</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#333] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">AR</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Anand Rao</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-402</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Hubli Zone</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">15x Zari Borders</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 4 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 23, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30">Assigned: Truck B</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8838</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#8b4513] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">MN</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Meera N</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-510</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Udupi Center</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">25x Shawls</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 12 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 23, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30">Assigned: Van 1</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8839</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#333] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">KM</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Kavitha M</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-511</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Bangalore South</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">100x Towels</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 20 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 24, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30">Assigned: Truck C</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8840</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#1a1a1a] text-[#d4af37] flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">RT</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Rajesh T</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-512</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Mysore Hub</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">50x Stoles</p>
+                        <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5">Est. Weight: 15 kg</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 24, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30">Assigned: Truck A</span>
+                    </td>
+                </tr>
+            </tbody>
+
+            <!-- COMPLETED TAB BODY (Hidden by default) -->
+            <tbody id="tab-completed" class="text-sm text-[#f5ebd7] divide-y divide-[#d4af37]/10 hidden transition-opacity duration-300">
+                <tr class="hover:bg-white/5 transition-colors group opacity-70">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8812</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#8b4513] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">DE</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Devappa</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-290</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Udupi Center</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">30x Kanjeevaram</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 20, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30 bg-green-900/20">Completed</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group opacity-70">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8814</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#1a1a1a] text-[#d4af37] flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">GO</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Gowramma</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-291</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Hubli Zone</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">100x Shawls</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 20, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30 bg-green-900/20">Completed</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group opacity-70">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8817</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#8b4513] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">SH</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Shivraj</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-301</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Mysore Hub</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">45x Silk Sarees</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 21, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30 bg-green-900/20">Completed</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group opacity-70">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8822</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#333] text-white flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">NP</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Nataraj P</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-320</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Bangalore South</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">60x Towels</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 21, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30 bg-green-900/20">Completed</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-white/5 transition-colors group opacity-70">
+                    <td class="py-5 px-4 font-mono text-[#d4af37]/80 font-bold">#PK-8823</td>
+                    <td class="py-5 px-4">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full bg-[#1a1a1a] text-[#d4af37] flex items-center justify-center font-bold text-xs mr-3 border border-[#d4af37]/30">CK</div>
+                            <div>
+                                <p class="font-serif text-[#f5ebd7] font-semibold">Chitra K</p>
+                                <p class="text-[10px] text-[#f5ebd7]/50 mt-0.5 uppercase tracking-widest">ID: ART-325</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-[#d4af37]">Mysore Hub</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold text-white">20x Zari</p>
+                    </td>
+                    <td class="py-5 px-4">
+                        <p class="font-semibold">Oct 22, 2026</p>
+                    </td>
+                    <td class="py-5 px-4 text-right">
+                        <span class="text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30 bg-green-900/20">Completed</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Hide all tabs
+        ['pending', 'assigned', 'completed'].forEach(t => {
+            const el = document.getElementById('tab-' + t);
+            el.classList.add('hidden');
+            
+            // Reset button styles
+            const btn = document.getElementById('tab-btn-' + t);
+            btn.className = 'text-[#f5ebd7]/40 hover:text-[#f5ebd7] pb-1 font-semibold uppercase tracking-widest text-xs transition-colors border-b-2 border-transparent';
+        });
+        
+        // Show selected tab
+        const selectedEl = document.getElementById('tab-' + tabName);
+        selectedEl.classList.remove('hidden');
+        
+        // Active button styles
+        const selectedBtn = document.getElementById('tab-btn-' + tabName);
+        selectedBtn.className = 'text-[#d4af37] border-b-2 border-[#d4af37] pb-1 font-semibold uppercase tracking-widest text-xs transition-colors';
+    }
+
+    function filterRows() {
+        const locationVal = document.getElementById('location-filter').value.toLowerCase();
+        const dateVal = document.getElementById('date-filter').value; // format YYYY-MM-DD
+        
+        // Convert input date to a simple comparable format (e.g., Oct 24, 2026)
+        let formattedDate = '';
+        if (dateVal) {
+            const dateObj = new Date(dateVal);
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = months[dateObj.getMonth()];
+            const day = dateObj.getDate().toString().padStart(2, '0');
+            const year = dateObj.getFullYear();
+            // Simple match string, eg "Oct 24, 2026"
+            // Note: date input gives UTC basically, local time might shift it. We'll do a simple includes check.
+            formattedDate = `${month} ${parseInt(day)}`; 
+        }
+
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const locCell = row.querySelector('td:nth-child(3) p.text-\\[\\#d4af37\\]');
+            const dateCell = row.querySelector('td:nth-child(5) p.font-semibold');
+            
+            if (locCell && dateCell) {
+                const locText = locCell.innerText.toLowerCase();
+                const dateText = dateCell.innerText;
+
+                let showLoc = locationVal === 'all' || locText.includes(locationVal);
+                let showDate = !formattedDate || dateText.includes(formattedDate);
+
+                if (showLoc && showDate) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    function handleAction(rowId, action) {
+        const row = document.getElementById(rowId);
+        if (row) {
+            row.style.opacity = '0';
+            row.style.transform = action === 'accept' ? 'translateX(20px)' : 'translateX(-20px)';
+            row.style.transition = 'all 0.3s ease-out';
+            
+            setTimeout(() => {
+                if(action === 'accept') {
+                    // Get assigned tab body
+                    const assignedTab = document.getElementById('tab-assigned');
+                    
+                    // Reset styling for the new tab
+                    row.style.opacity = '1';
+                    row.style.transform = 'none';
+                    
+                    // Update the actions cell to a span badge
+                    const actionsCell = row.querySelector('td:last-child');
+                    actionsCell.innerHTML = `<span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30">Assigned: Auto Fleet</span>`;
+                    
+                    // Move the row
+                    assignedTab.prepend(row);
+                    
+                    // Update counts
+                    updateTabCounts();
+                    
+                    // Let user know and switch tabs
+                    alert('Pickup Assigned to Fleet!');
+                    switchTab('assigned');
+                    
+                } else {
+                    row.remove();
+                    updateTabCounts();
+                }
+            }, 300);
+        }
+    }
+
+    function updateTabCounts() {
+        const pendingCount = document.querySelectorAll('#tab-pending tr').length;
+        const assignedCount = document.querySelectorAll('#tab-assigned tr').length;
+        const completedCount = document.querySelectorAll('#tab-completed tr').length;
+        
+        document.getElementById('tab-btn-pending').innerText = `Pending (${pendingCount})`;
+        document.getElementById('tab-btn-assigned').innerText = `Assigned (${assignedCount})`;
+        document.getElementById('tab-btn-completed').innerText = `Completed (${completedCount})`;
+    }
+</script>
+{% endblock %}

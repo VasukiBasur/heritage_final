@@ -1,0 +1,81 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}System Notifications{% endblock %}
+{% block header_title %}Alerts & Updates{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-3xl font-serif text-brand-gold">Notifications</h2>
+        <p class="text-sm text-brand-lightgold/50 mt-1">Stay updated on order statuses, material requests, and system alerts.</p>
+    </div>
+    <button onclick="document.querySelectorAll('.unread-dot').forEach(d => d.style.display = 'none');" class="text-brand-gold hover:text-yellow-500 text-sm font-bold uppercase tracking-widest border border-brand-gold/30 hover:border-brand-gold py-2 px-4 rounded transition-colors">
+        Mark all as read
+    </button>
+</div>
+
+<div class="glass-card rounded overflow-hidden p-0 max-w-4xl border-t-4 border-t-brand-gold">
+    
+    <div class="divide-y divide-brand-gold/10">
+        
+        <!-- Notification 1 (Unread) -->
+        <div class="p-6 bg-brand-gold/5 hover:bg-brand-gold/10 transition-colors relative cursor-pointer">
+            <div class="unread-dot absolute left-3 top-1/2 transform -translate-y-1/2 w-2 h-2 rounded-full bg-brand-gold shadow-[0_0_8px_rgba(212,175,55,0.8)]"></div>
+            <div class="flex items-start ml-4">
+                <div class="p-3 rounded-full bg-green-900/30 text-green-400 mr-4 border border-green-500/30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                    <h4 class="text-brand-lightgold font-bold text-lg">Material Request Approved</h4>
+                    <p class="text-sm text-gray-300 mt-1">Your request for <span class="text-brand-gold font-mono">15kg Pure Gold Zari Thread</span> has been approved by the Admin and is currently out for delivery.</p>
+                    <p class="text-xs text-brand-lightgold/40 mt-2 font-mono">2 hours ago</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification 2 (Unread) -->
+        <div class="p-6 bg-brand-gold/5 hover:bg-brand-gold/10 transition-colors relative cursor-pointer">
+            <div class="unread-dot absolute left-3 top-1/2 transform -translate-y-1/2 w-2 h-2 rounded-full bg-brand-gold shadow-[0_0_8px_rgba(212,175,55,0.8)]"></div>
+            <div class="flex items-start ml-4">
+                <div class="p-3 rounded-full bg-blue-900/30 text-blue-400 mr-4 border border-blue-500/30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                </div>
+                <div>
+                    <h4 class="text-brand-lightgold font-bold text-lg">New Order Received</h4>
+                    <p class="text-sm text-gray-300 mt-1">You have received a new bulk order for <span class="text-brand-gold font-mono">5x Royal Mysore Silk Sarees</span>. Please review in the Orders module.</p>
+                    <p class="text-xs text-brand-lightgold/40 mt-2 font-mono">5 hours ago</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification 3 (Read) -->
+        <div class="p-6 hover:bg-brand-gold/5 transition-colors relative cursor-pointer">
+            <div class="flex items-start ml-4 opacity-70">
+                <div class="p-3 rounded-full bg-yellow-900/30 text-yellow-400 mr-4 border border-yellow-500/30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                    <h4 class="text-brand-lightgold font-bold text-lg">Payout Processed</h4>
+                    <p class="text-sm text-gray-300 mt-1">Your recent earnings payout of <span class="text-green-400 font-mono">₹45,200</span> has been processed successfully to your registered bank account.</p>
+                    <p class="text-xs text-brand-lightgold/40 mt-2 font-mono">Yesterday</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notification 4 (Read) -->
+        <div class="p-6 hover:bg-brand-gold/5 transition-colors relative cursor-pointer">
+            <div class="flex items-start ml-4 opacity-70">
+                <div class="p-3 rounded-full bg-purple-900/30 text-purple-400 mr-4 border border-purple-500/30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                </div>
+                <div>
+                    <h4 class="text-brand-lightgold font-bold text-lg">System Update: Platform Maintenance</h4>
+                    <p class="text-sm text-gray-300 mt-1">The Heritage Handloom Tracker will undergo scheduled maintenance this Sunday between 2:00 AM and 4:00 AM IST.</p>
+                    <p class="text-xs text-brand-lightgold/40 mt-2 font-mono">3 days ago</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

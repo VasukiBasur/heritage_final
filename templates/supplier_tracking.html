@@ -1,0 +1,433 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Enterprise Logistics Tracking{% endblock %}
+{% block header_title %}Command Center - Live Tracking{% endblock %}
+
+{% block content %}
+<!-- Use a specific mapId if possible, but fallback to no mapId -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
+
+<style>
+    .glass-panel {
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    }
+    .glow-text {
+        text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    }
+    
+    /* Aggressively hide Google Maps billing/error dialogs */
+    .gm-err-container, 
+    .gm-err-content, 
+    .gm-err-title, 
+    .gm-err-message,
+    .dismissButton,
+    .dismissButtonParent,
+    .gm-style-dialog {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        width: 0 !important;
+    }
+    
+    /* Hide the dark transparent overlay that appears behind the popup */
+    .gm-style-bg {
+        display: none !important;
+        opacity: 0 !important;
+    }
+</style>
+
+<div class="mb-6 flex justify-between items-end">
+    <div>
+        <h2 class="text-4xl font-serif text-[#f5ebd7] glow-text">Fleet Command Center</h2>
+        <p class="text-sm text-[#d4af37]/70 mt-2 tracking-wide font-light flex items-center">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse mr-2 shadow-[0_0_8px_#22c55e]"></span>
+            Enterprise Logistics Network Active
+        </p>
+    </div>
+</div>
+
+<div class="glass-panel rounded-2xl w-full relative overflow-hidden mb-8 shadow-[0_0_40px_rgba(212,175,55,0.05)] border border-[#d4af37]/30" style="height: calc(100vh - 200px); min-height: 700px;">
+    
+    <div class="absolute top-6 left-6 z-[1000] space-y-4 pointer-events-none">
+        <div class="glass-panel p-4 rounded-xl flex items-center space-x-4 border-l-4 border-l-blue-500 pointer-events-auto hover:bg-[#1a1a1a]/90 transition-all cursor-pointer">
+            <div class="p-3 bg-blue-500/10 rounded-lg">
+                <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </div>
+            <div>
+                <p class="text-[10px] uppercase tracking-widest text-[#d4af37]/70 font-bold">Active Fleet</p>
+                <h4 class="text-2xl font-bold text-white font-mono">8 / 8</h4>
+            </div>
+        </div>
+        <div class="glass-panel p-4 rounded-xl flex items-center space-x-4 border-l-4 border-l-green-500 pointer-events-auto hover:bg-[#1a1a1a]/90 transition-all cursor-pointer">
+            <div class="p-3 bg-green-500/10 rounded-lg">
+                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <div>
+                <p class="text-[10px] uppercase tracking-widest text-[#d4af37]/70 font-bold">Total Transits</p>
+                <h4 class="text-2xl font-bold text-white font-mono">2,104 km</h4>
+            </div>
+        </div>
+        <div class="glass-panel p-4 rounded-xl flex items-center space-x-4 border-l-4 border-l-red-500 pointer-events-auto hover:bg-[#1a1a1a]/90 transition-all cursor-pointer">
+            <div class="p-3 bg-red-500/10 rounded-lg">
+                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div>
+                <p class="text-[10px] uppercase tracking-widest text-[#d4af37]/70 font-bold">Issues</p>
+                <h4 class="text-2xl font-bold text-white font-mono">1</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="absolute top-6 right-6 bottom-6 w-80 z-[1000] flex flex-col pointer-events-none">
+        <div class="glass-panel rounded-xl p-5 border border-[#d4af37]/20 flex-grow overflow-y-auto pointer-events-auto custom-scrollbar">
+            <h4 class="text-xs font-bold text-[#d4af37] uppercase tracking-widest mb-4 flex justify-between items-center">
+                Live Inter-State Fleet
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+            </h4>
+            
+            <div class="space-y-4" id="fleet-cards-container">
+                <div class="text-white text-xs text-center mt-10">Loading Live Fleet Data...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="delivery-map" class="w-full h-full"></div>
+</div>
+
+<script>
+    let mapInstance = null;
+    let polylineOverlays = []; 
+
+    let HTMLMarker;
+
+    function getBezierCurve(p0, p1, p2, numPoints = 100) {
+        const points = [];
+        for (let i = 0; i <= numPoints; i++) {
+            const t = i / numPoints;
+            const lat = Math.pow(1 - t, 2) * p0.lat + 2 * (1 - t) * t * p1.lat + Math.pow(t, 2) * p2.lat;
+            const lng = Math.pow(1 - t, 2) * p0.lng + 2 * (1 - t) * t * p1.lng + Math.pow(t, 2) * p2.lng;
+            points.push({ lat, lng });
+        }
+        return points;
+    }
+
+    function initMap() {
+        if (mapInstance) return;
+
+        HTMLMarker = class extends google.maps.OverlayView {
+            constructor(latlng, html, map, offset = {x: 0, y: 0}, zIndex = 0) {
+                super();
+                this.latlng = latlng;
+                this.html = html;
+                this.div = null;
+                this.offset = offset;
+                this.z = zIndex;
+                this.setMap(map);
+            }
+            onAdd() {
+                try {
+                    this.div = document.createElement('div');
+                    this.div.style.position = 'absolute';
+                    this.div.style.transform = `translate(calc(-50% + ${this.offset.x}px), calc(-50% + ${this.offset.y}px))`;
+                    this.div.style.zIndex = this.z;
+                    this.div.innerHTML = this.html;
+                    const panes = this.getPanes();
+                    if (panes && panes.overlayMouseTarget) {
+                        panes.overlayMouseTarget.appendChild(this.div);
+                    } else if (panes && panes.overlayLayer) {
+                        panes.overlayLayer.appendChild(this.div);
+                    }
+                } catch (e) { console.error('HTMLMarker onAdd error:', e); }
+            }
+            draw() {
+                try {
+                    const overlayProjection = this.getProjection();
+                    if(!overlayProjection) return;
+                    const position = overlayProjection.fromLatLngToDivPixel(this.latlng);
+                    if (this.div) {
+                        this.div.style.left = position.x + 'px';
+                        this.div.style.top = position.y + 'px';
+                    }
+                } catch (e) { console.error('HTMLMarker draw error:', e); }
+            }
+            onRemove() {
+                if (this.div && this.div.parentNode) {
+                    this.div.parentNode.removeChild(this.div);
+                    this.div = null;
+                }
+            }
+        };
+
+        const mapStyles = [
+            { elementType: "geometry", stylers: [{ color: "#141414" }] },
+            { elementType: "labels.text.stroke", stylers: [{ color: "#000000" }] },
+            { elementType: "labels.text.fill", stylers: [{ color: "#808080" }] },
+            { featureType: "administrative", elementType: "labels.text.fill", stylers: [{ color: "#d4af37" }] },
+            { featureType: "road", elementType: "geometry", stylers: [{ color: "#1a1a1a" }] },
+            { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#333333" }] },
+            { featureType: "water", elementType: "geometry", stylers: [{ color: "#0a0a0a" }] }
+        ];
+
+        mapInstance = new google.maps.Map(document.getElementById("delivery-map"), {
+            center: { lat: 13.0, lng: 77.0 },
+            zoom: 6,
+            styles: mapStyles,
+            disableDefaultUI: true,
+            zoomControl: true,
+            backgroundColor: '#141414'
+        });
+
+        google.maps.event.addListenerOnce(mapInstance, 'idle', () => {
+            renderRoutes();
+        });
+    }
+
+    function renderRoutes() {
+        const truckPath = "M17.4,0H5.6C2.5,0,0,3.5,0,6.6v34.8c0,3.1,2.5,5.6,5.6,5.6h11.8c3.1,0,5.6-2.5,5.6-5.6V6.6C23,3.5,20.5,0,17.4,0z M22.1,14.2v11.7l-2.7,0.4v-11.4L22.1,14.2z M20.6,10.8c-1,3.9-2.2,8.5-2.2,8.5H4.6l-2.2-8.5C2.4,10.8,11.3,7.8,20.6,10.8z M3.7,21.7v11.4l-2.7-0.4v-11.7L3.7,21.7z";
+        const vanPath = "M28.4,15.2c-0.2-1.3-0.7-2.6-1.5-3.6c-0.8-1-1.8-1.7-2.9-2.2l-3-1.1c-1.3-0.5-2.6-0.7-4-0.7H13.6c-1.8,0-3.5,0.4-5.1,1.1 l-1.8,0.8c-1.7,0.7-3.2,1.8-4.5,3.2L1,14c-1,1.1-1.3,2.6-1,4.1l1.5,8c0.2,0.9,0.7,1.7,1.3,2.3c0.7,0.6,1.5,0.9,2.4,0.9h0.4 c0.8,2.7,3.3,4.6,6.3,4.6s5.5-1.9,6.3-4.6h3.4c0.8,2.7,3.3,4.6,6.3,4.6s5.5-1.9,6.3-4.6h1.2c1.3,0,2.3-1,2.3-2.3V18 C30,16.8,29.4,15.7,28.4,15.2z";
+        const bikePath = "M19,13h-2v-2h-3v2H8.5c-1.5,0-2.8,1.1-3,2.5c-0.2,1.2,0.5,2.4,1.7,2.8L10.3,19l1.7-1l-3.3-1h3.1 c1.6,0,2.9-1.2,3-2.8l0-0.2H19v2h2v-4C21,13.4,20.1,13,19,13z M5.5,13C3.6,13,2,14.6,2,16.5S3.6,20,5.5,20S9,18.4,9,16.5 S7.4,13,5.5,13z M5.5,18C4.7,18,4,17.3,4,16.5S4.7,15,5.5,15S7,15.7,7,16.5S6.3,18,5.5,18z M18.5,13C16.6,13,15,14.6,15,16.5 S16.6,20,18.5,20S22,18.4,22,16.5S20.4,13,18.5,13z M18.5,18c-0.8,0-1.5-0.7-1.5-1.5s0.7-1.5,1.5-1.5s1.5,0.7,1.5,1.5 S19.3,18,18.5,18z";
+
+        const hubs = {
+            bangalore: { lat: 12.9716, lng: 77.5946 },
+            mysore: { lat: 12.2958, lng: 76.6394 },
+            udupi: { lat: 13.3409, lng: 74.7421 },
+            chitradurga: { lat: 14.2255, lng: 76.4010 },
+            hubli: { lat: 15.3647, lng: 75.1240 },
+            belgaum: { lat: 15.8497, lng: 74.4977 },
+            bellary: { lat: 15.1394, lng: 76.9214 },
+            shimoga: { lat: 13.9299, lng: 75.5681 },
+            mangalore: { lat: 12.9141, lng: 74.8560 },
+            chennai: { lat: 13.0827, lng: 80.2707 },
+            hyderabad: { lat: 17.3850, lng: 78.4867 },
+            kochi: { lat: 9.9312, lng: 76.2673 },
+            goa: { lat: 15.2993, lng: 74.1240 }
+        };
+
+        const deliveries = [
+            {
+                start: hubs.bangalore,
+                mid: { lat: 13.0068, lng: 76.1004 },
+                end: hubs.mysore,
+                color: '#3b82f6', vehicle: truckPath, scale: 0.6,
+                id: 'TRK-101', title: 'Blr → Mysuru', status: 'In Transit', eta: '45 mins', dist: '120 km', progress: 0.3, speed: 0.002
+            },
+            {
+                start: hubs.udupi,
+                mid: hubs.shimoga,
+                end: hubs.chitradurga,
+                color: '#f97316', vehicle: vanPath, scale: 0.8,
+                id: 'VAN-202', title: 'Udupi → Chitrad', status: 'In Transit', eta: '2 hrs 15m', dist: '210 km', progress: 0.6, speed: 0.0015
+            },
+            {
+                start: hubs.hubli,
+                mid: { lat: 14.4644, lng: 75.9218 },
+                end: hubs.mysore,
+                color: '#ef4444', vehicle: truckPath, scale: 0.6,
+                id: 'TRK-303', title: 'Hubli → Mysuru', status: 'Delayed', eta: 'Unknown', dist: '390 km', progress: 0.5, speed: 0.0005
+            },
+            {
+                start: hubs.belgaum,
+                mid: hubs.hubli,
+                end: hubs.bellary,
+                color: '#a855f7', vehicle: truckPath, scale: 0.6,
+                id: 'TRK-404', title: 'Belagavi → Ballari', status: 'In Transit', eta: '4 hrs', dist: '280 km', progress: 0.2, speed: 0.001
+            },
+            {
+                start: hubs.shimoga,
+                mid: hubs.udupi,
+                end: hubs.mangalore,
+                color: '#22c55e', vehicle: bikePath, scale: 1.0,
+                id: 'BIKE-505', title: 'Shivamogga → Mangaluru', status: 'Completed', eta: 'Delivered', dist: '0 km', progress: 1.0, speed: 0
+            },
+            {
+                start: hubs.chennai,
+                mid: { lat: 12.9, lng: 79.1 },
+                end: hubs.bangalore,
+                color: '#eab308', vehicle: vanPath, scale: 0.8,
+                id: 'VAN-606', title: 'Chennai → Blr', status: 'Pending', eta: '6 hrs', dist: '350 km', progress: 0.05, speed: 0.001
+            },
+            {
+                start: hubs.hyderabad,
+                mid: { lat: 15.8, lng: 78.0 },
+                end: hubs.bangalore,
+                color: '#ec4899', vehicle: truckPath, scale: 0.6,
+                id: 'TRK-707', title: 'Hyderabad → Blr', status: 'In Transit', eta: '8 hrs', dist: '570 km', progress: 0.4, speed: 0.0012
+            },
+            {
+                start: hubs.kochi,
+                mid: { lat: 11.2, lng: 76.5 },
+                end: hubs.mysore,
+                color: '#06b6d4', vehicle: truckPath, scale: 0.6,
+                id: 'TRK-808', title: 'Kochi → Mysuru', status: 'In Transit', eta: '5 hrs', dist: '380 km', progress: 0.7, speed: 0.0014
+            }
+        ];
+
+        let lineAnimations = [];
+        const cardsHtml = [];
+
+        deliveries.forEach((delivery, index) => {
+            try {
+                const curvePoints = getBezierCurve(delivery.start, delivery.mid, delivery.end, 100);
+
+                const blurLine = new google.maps.Polyline({
+                    path: curvePoints, geodesic: true, strokeColor: delivery.color, strokeOpacity: 0.25, strokeWeight: 16, map: mapInstance, clickable: false
+                });
+
+                const coreLine = new google.maps.Polyline({
+                    path: curvePoints, geodesic: true, strokeColor: delivery.color, strokeOpacity: 1, strokeWeight: 3,
+                    icons: [{
+                        icon: { path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW, scale: 2.5, strokeColor: "#ffffff", fillColor: "#ffffff", fillOpacity: 1 },
+                        offset: '0%', repeat: '120px'
+                    }],
+                    map: mapInstance, clickable: false
+                });
+                polylineOverlays.push({blur: blurLine, core: coreLine});
+                lineAnimations.push(coreLine);
+
+                // Use robust markers
+                new HTMLMarker(delivery.start, `<div class="w-3 h-3 rounded-full" style="background-color: ${delivery.color}; border: 1px solid white;"></div>`, mapInstance, {x:0,y:0}, 1);
+                new HTMLMarker(delivery.end, `<div class="w-5 h-5 rounded-full" style="background-color: ${delivery.color}; border: 2px solid white;"></div>`, mapInstance, {x:0,y:0}, 2);
+                
+                const badgeHtml = `
+                    <div style="background: rgba(10,10,10,0.85); border: 1px solid ${delivery.color}80; color: ${delivery.color}; font-size: 9px; padding: 4px; border-radius: 4px; text-align: center; white-space: nowrap; font-weight: bold; pointer-events: none;">
+                        ${delivery.status} <br/> <span style="color: white; font-size: 8px;">${delivery.eta}</span>
+                    </div>`;
+                new HTMLMarker(delivery.mid, badgeHtml, mapInstance, {x: 0, y: -25}, 10);
+
+                const vehicleMarker = new google.maps.Marker({
+                    position: curvePoints[0],
+                    map: mapInstance,
+                    icon: {
+                        path: delivery.vehicle, scale: delivery.scale, fillColor: "#ffffff", fillOpacity: 1, strokeWeight: 1.5, strokeColor: delivery.color, anchor: new google.maps.Point(12, 12), rotation: 0
+                    },
+                    zIndex: 999
+                });
+
+                function getHeading(p1, p2) {
+                    return Math.atan2(p2.lng - p1.lng, p2.lat - p1.lat) * 180 / Math.PI;
+                }
+
+                function animateVehicle() {
+                    if (delivery.speed > 0) {
+                        delivery.progress += delivery.speed;
+                        if (delivery.progress >= 1.0) delivery.progress = 0; 
+                    }
+                    
+                    const floatIndex = delivery.progress * (curvePoints.length - 1);
+                    const i = Math.floor(floatIndex);
+                    
+                    if (i < curvePoints.length - 1) {
+                        const frac = floatIndex - i;
+                        const p1 = curvePoints[i];
+                        const p2 = curvePoints[i+1];
+                        const currentLat = p1.lat + (p2.lat - p1.lat) * frac;
+                        const currentLng = p1.lng + (p2.lng - p1.lng) * frac;
+                        const pos = new google.maps.LatLng(currentLat, currentLng);
+                        
+                        vehicleMarker.setPosition(pos);
+                        const heading = getHeading(p1, p2);
+                        
+                        const currentIcon = vehicleMarker.getIcon();
+                        if (currentIcon) {
+                            vehicleMarker.setIcon(Object.assign({}, currentIcon, { rotation: heading }));
+                        }
+                    }
+                    requestAnimationFrame(animateVehicle);
+                }
+                
+                if(delivery.speed > 0) {
+                    animateVehicle();
+                } else {
+                    vehicleMarker.setPosition(curvePoints[curvePoints.length-1]);
+                    const p1 = curvePoints[curvePoints.length-2];
+                    const p2 = curvePoints[curvePoints.length-1];
+                    const currentIcon = vehicleMarker.getIcon();
+                    if (currentIcon) {
+                        vehicleMarker.setIcon(Object.assign({}, currentIcon, { rotation: getHeading(p1, p2) }));
+                    }
+                }
+
+                cardsHtml.push(`
+                    <div class="bg-gradient-to-r from-black to-[#111] p-4 rounded-lg border hover:scale-[1.02] transition-transform cursor-pointer shadow-lg relative overflow-hidden" 
+                         style="border-color: ${delivery.color}50;"
+                         onmouseover="focusRoute(${index})" onmouseout="unfocusRoute()">
+                        <div class="absolute left-0 top-0 bottom-0 w-1 opacity-80" style="background-color: ${delivery.color};"></div>
+                        <div class="flex justify-between items-start mb-2 pl-2">
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded border" style="color: ${delivery.color}; border-color: ${delivery.color}30; background: ${delivery.color}10;">${delivery.id}</span>
+                            <span class="text-[9px] font-bold uppercase tracking-wider" style="color: ${delivery.status === 'Delayed' ? '#ef4444' : '#fff'};">${delivery.eta}</span>
+                        </div>
+                        <div class="text-sm font-semibold text-[#f5ebd7] truncate pl-2">${delivery.title}</div>
+                        <div class="flex items-center mt-3 pl-2">
+                            <div class="w-full bg-[#222] rounded-full h-1.5">
+                                <div class="h-1.5 rounded-full relative" style="background-color: ${delivery.color}; width: ${delivery.progress * 100}%">
+                                    <span class="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full shadow-[0_0_8px_#fff]"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            } catch (err) {
+                console.error("Error processing delivery route", index, err);
+                cardsHtml.push(`<div style="color:red; font-size:12px; padding:10px; border:1px solid red; margin-bottom:5px;">Error ${index}: ${err.message}<br/>${(err.stack || '').split('\\n')[1] || ''}</div>`);
+            }
+        });
+
+        document.getElementById('fleet-cards-container').innerHTML = cardsHtml.join('');
+
+        let offsetCount = 0;
+        window.setInterval(() => {
+            offsetCount = (offsetCount + 1) % 200;
+            lineAnimations.forEach(line => {
+                try {
+                    const icons = line.get('icons');
+                    if (icons && icons[0]) {
+                        icons[0].offset = (offsetCount / 2) + '%';
+                        line.set('icons', icons);
+                    }
+                } catch(e){}
+            });
+        }, 50);
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+    });
+
+    window.focusRoute = function(index) {
+        polylineOverlays.forEach((route, i) => {
+            try {
+                if(i !== index) {
+                    route.blur.setOptions({strokeOpacity: 0.02});
+                    route.core.setOptions({strokeOpacity: 0.1});
+                } else {
+                    route.blur.setOptions({strokeOpacity: 0.6, strokeWeight: 24});
+                    route.core.setOptions({strokeOpacity: 1, strokeWeight: 5});
+                }
+            } catch(e) {}
+        });
+    };
+
+    window.unfocusRoute = function() {
+        polylineOverlays.forEach((route) => {
+            try {
+                route.blur.setOptions({strokeOpacity: 0.25, strokeWeight: 16});
+                route.core.setOptions({strokeOpacity: 1, strokeWeight: 3});
+            } catch(e) {}
+        });
+    };
+
+    // Gently dismiss the Google Maps dialog by just clicking the "OK" button automatically
+    window.setInterval(() => {
+        const btn = document.querySelector('.dismissButton');
+        if (btn) {
+            btn.click();
+        }
+    }, 100);
+
+</script>
+{% endblock %}

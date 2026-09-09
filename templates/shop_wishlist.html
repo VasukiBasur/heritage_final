@@ -1,0 +1,167 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}My Wishlist - Heritage Handloom{% endblock %}
+{% block header_title %}My Wishlist{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background-image: radial-gradient(rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+    .glow-hover:hover {
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        border-color: rgba(212, 175, 55, 0.5);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6 pb-10">
+
+    <!-- Header -->
+    <div class="glass-panel p-6 rounded-2xl border border-brand-gold/20 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h2 class="text-2xl font-serif text-brand-lightgold flex items-center gap-2">
+                <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+                Saved Collections
+            </h2>
+            <p class="text-sm text-gray-400">Your curated selection of heritage textiles.</p>
+        </div>
+        <a href="/shop/products" class="px-6 py-2 bg-brand-gold/10 text-brand-gold border border-brand-gold/30 rounded-full hover:bg-brand-gold hover:text-black transition-colors flex items-center space-x-2 text-sm font-bold shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            <span>Continue Shopping</span>
+        </a>
+    </div>
+
+    <!-- Empty State Container -->
+    <div id="empty-state" class="glass-panel rounded-2xl border border-gray-800 p-16 flex flex-col items-center justify-center text-center hidden">
+        <div class="w-24 h-24 bg-[#1a1a1a] rounded-full flex items-center justify-center mb-6 border border-gray-800">
+            <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        </div>
+        <h3 class="text-2xl font-serif text-white mb-2">Your wishlist is empty.</h3>
+        <p class="text-gray-400 max-w-md mb-8">Explore our heritage collection and save your favorite master weaves for later.</p>
+        <a href="/shop/products" class="px-8 py-3 bg-brand-gold text-black rounded-lg font-bold hover:bg-yellow-500 transition-colors shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+            Explore Collections
+        </a>
+    </div>
+
+    <!-- Product Grid -->
+    <div id="wishlist-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Products dynamically rendered here by JS -->
+    </div>
+
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+<script>
+    // Global Toast Function
+    window.showToast = function(message) {
+        const toast = document.createElement('div');
+        toast.className = 'bg-black/90 border border-brand-gold/50 shadow-lg text-white px-5 py-3 rounded-lg text-sm transition-opacity duration-300 opacity-0';
+        toast.innerHTML = `<span class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${message}</span>`;
+        const container = document.getElementById('toast-container');
+        if(container) {
+            container.appendChild(toast);
+            setTimeout(() => toast.style.opacity = '1', 10);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+    };
+
+    // Global Wishlist Toggle Function (used for removing items directly from the card)
+    window.toggleWishlistProduct = function(btn, title, price, imgSrc) {
+        let wishlistItems = JSON.parse(localStorage.getItem('userWishlist')) || [];
+        const existingIndex = wishlistItems.findIndex(i => i.title === title);
+        
+        if (existingIndex >= 0) {
+            wishlistItems.splice(existingIndex, 1);
+            window.showToast(title + " removed from wishlist");
+            localStorage.setItem('userWishlist', JSON.stringify(wishlistItems));
+            
+            // Re-render the page
+            renderWishlistPage();
+        }
+    };
+
+    // Format currency helper
+    function formatCurrency(amount) {
+        return "₹" + amount.toLocaleString("en-IN");
+    }
+
+    // Main render function
+    function renderWishlistPage() {
+        const grid = document.getElementById('wishlist-grid');
+        const emptyState = document.getElementById('empty-state');
+        let wishlistItems = JSON.parse(localStorage.getItem('userWishlist')) || [];
+        
+        if (wishlistItems.length === 0) {
+            grid.innerHTML = "";
+            grid.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        grid.classList.remove('hidden');
+        grid.innerHTML = "";
+
+        wishlistItems.forEach((product, index) => {
+            // Escape quotes for the inline handler
+            const escapedTitle = product.title.replace(/'/g, "\\'");
+            
+            const cardHtml = `
+            <div class="product-card glass-panel rounded-2xl overflow-hidden border border-gray-800 transition-all glow-hover group relative flex flex-col">
+                <button class="absolute top-3 right-3 z-20 p-2 bg-black/50 backdrop-blur rounded-full text-red-500 hover:text-white transition-colors cursor-pointer" onclick="event.preventDefault(); event.stopPropagation(); window.toggleWishlistProduct(this, '${escapedTitle}', ${product.price}, '${product.imgSrc}');" title="Remove from Wishlist">
+                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+                </button>
+                <div class="h-48 overflow-hidden relative">
+                    <img src="${product.imgSrc}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" alt="Product">
+                </div>
+                <div class="p-5 flex-1 flex flex-col">
+                    <h3 class="text-lg font-serif text-white mb-2 line-clamp-1 product-title">${product.title}</h3>
+                    <div class="mt-auto flex items-center justify-between">
+                        <span class="text-lg font-bold text-brand-lightgold">${formatCurrency(product.price)}</span>
+                        <button class="add-to-cart-btn px-3 py-1.5 bg-brand-gold text-black rounded text-xs font-bold hover:bg-yellow-500 transition-colors" data-title="${escapedTitle}" data-price="${product.price}" data-img="${product.imgSrc}">Add to Cart</button>
+                    </div>
+                </div>
+            </div>`;
+            grid.innerHTML += cardHtml;
+        });
+
+        // Bind Add to Cart buttons
+        document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const title = e.currentTarget.dataset.title;
+                const price = parseFloat(e.currentTarget.dataset.price);
+                const img = e.currentTarget.dataset.img;
+                
+                let cartItems = JSON.parse(localStorage.getItem('userOrders')) || [];
+                // userOrders is not array in shop_products... wait, shop_products uses a global array `cartItems` but doesn't persist it across reloads.
+                // For simplicity, we just trigger a toast here since actual cart persistence is a separate phase.
+                
+                // Show success toast
+                const originalText = btn.innerText;
+                btn.innerHTML = `<svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Added`;
+                btn.classList.remove("bg-brand-gold", "text-black", "hover:bg-yellow-500");
+                btn.classList.add("bg-green-500", "text-white");
+                window.showToast(title + " added to cart!");
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.add("bg-brand-gold", "text-black", "hover:bg-yellow-500");
+                    btn.classList.remove("bg-green-500", "text-white");
+                }, 2000);
+            });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        renderWishlistPage();
+    });
+</script>
+{% endblock %}

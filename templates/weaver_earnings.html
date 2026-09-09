@@ -1,0 +1,82 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Earnings & Payments{% endblock %}
+{% block header_title %}Financial Overview{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-3xl font-serif text-brand-gold">My Earnings & Payments</h2>
+        <p class="text-sm text-brand-lightgold/50 mt-1">Track your revenue, pending payouts, and historical transactions.</p>
+    </div>
+    <button onclick="alert('Payout request initiated. Expected processing time: 2-3 business days.')" class="bg-brand-gold hover:bg-yellow-500 text-brand-black font-bold uppercase tracking-widest py-3 px-6 rounded-sm transition-all shadow-[0_0_15px_rgba(212,175,55,0.2)] text-sm flex items-center transform hover:-translate-y-1">
+        Request Payout
+    </button>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-brand-gold shadow-lg bg-[#1a1a1a]">
+        <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase mb-2">Available Balance</span>
+        <span class="text-4xl font-serif text-brand-gold">₹45,200</span>
+    </div>
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-brand-lightgold shadow-lg bg-[#1a1a1a]">
+        <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase mb-2">Pending Escrow</span>
+        <span class="text-4xl font-serif text-brand-lightgold">₹12,500</span>
+    </div>
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-green-500 shadow-lg bg-[#1a1a1a]">
+        <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase mb-2">Total Earnings</span>
+        <span class="text-4xl font-serif text-green-400">₹142,800</span>
+    </div>
+</div>
+
+<!-- Transactions Table -->
+<div class="glass-card rounded overflow-hidden">
+    <div class="px-8 py-6 border-b border-brand-gold/10 bg-brand-black/40">
+        <h3 class="text-xl font-serif text-brand-gold">Recent Transactions</h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-brand-gold/10">
+            <thead class="bg-brand-black/80">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Transaction ID</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Date</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Description</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Amount</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-brand-lightgold/50 uppercase tracking-widest">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-brand-gold/5 bg-brand-dark/50">
+                <tr class="hover:bg-brand-gold/5 transition-colors">
+                    <td class="px-6 py-4 text-sm text-brand-gold font-mono">#TXN-8091</td>
+                    <td class="px-6 py-4 text-sm text-brand-lightgold/70">Oct 24, 2026</td>
+                    <td class="px-6 py-4 text-sm text-gray-300">Sale of Silk Saree (ORD-9021)</td>
+                    <td class="px-6 py-4 text-sm text-green-400 font-bold">+₹15,000</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="bg-yellow-900/40 text-yellow-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-yellow-500/30">Pending Escrow</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-brand-gold/5 transition-colors">
+                    <td class="px-6 py-4 text-sm text-brand-gold font-mono">#TXN-7988</td>
+                    <td class="px-6 py-4 text-sm text-brand-lightgold/70">Oct 20, 2026</td>
+                    <td class="px-6 py-4 text-sm text-gray-300">Bank Transfer Payout</td>
+                    <td class="px-6 py-4 text-sm text-brand-lightgold font-bold">-₹20,000</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="bg-green-900/40 text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30">Completed</span>
+                    </td>
+                </tr>
+                <tr class="hover:bg-brand-gold/5 transition-colors">
+                    <td class="px-6 py-4 text-sm text-brand-gold font-mono">#TXN-7901</td>
+                    <td class="px-6 py-4 text-sm text-brand-lightgold/70">Oct 18, 2026</td>
+                    <td class="px-6 py-4 text-sm text-gray-300">Sale of Pashmina Shawl (ORD-8802)</td>
+                    <td class="px-6 py-4 text-sm text-green-400 font-bold">+₹8,500</td>
+                    <td class="px-6 py-4 text-sm">
+                        <span class="bg-green-900/40 text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30">Cleared</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

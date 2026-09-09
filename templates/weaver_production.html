@@ -1,0 +1,328 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Production Status{% endblock %}
+{% block header_title %}Loom & Weaving Operations{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-3xl font-serif text-brand-gold">Production Status</h2>
+        <p class="text-sm text-brand-lightgold/50 mt-1">Track your active looms and review completed traditional weaves.</p>
+    </div>
+    <div class="flex space-x-3">
+        <button id="filter-btn" onclick="toggleFilterActive()" class="bg-brand-black border border-brand-gold/30 hover:border-brand-gold hover:text-brand-gold text-brand-lightgold font-bold uppercase tracking-widest py-2 px-4 rounded text-xs transition-colors">
+            Filter: Active
+        </button>
+        <button onclick="openNewWeaveModal()" class="bg-brand-gold/20 hover:bg-brand-gold/40 text-brand-gold font-bold uppercase tracking-widest py-2 px-4 rounded text-xs transition-colors border border-brand-gold/30">
+            Log New Weave
+        </button>
+    </div>
+</div>
+
+<!-- Key Metrics Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-brand-gold shadow-lg bg-[#1a1a1a]">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase">Active Looms</span>
+            <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+        </div>
+        <span class="text-3xl font-serif text-brand-gold">{{ logs|selectattr('status', 'equalto', 'In Progress')|list|length }}</span>
+    </div>
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-green-500 shadow-lg bg-[#1a1a1a]">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase">Completed This Month</span>
+            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <span class="text-3xl font-serif text-green-400">{{ logs|selectattr('status', 'equalto', 'Completed')|list|length }}</span>
+    </div>
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-blue-500 shadow-lg bg-[#1a1a1a]">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase">Expected Payout</span>
+            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </div>
+        <span class="text-3xl font-serif text-blue-400">₹{{ "{:,.2f}".format(logs|sum(attribute='payout_amount')) if logs else '0.00' }}</span>
+    </div>
+</div>
+
+<!-- Active Production Logs -->
+<div class="glass-card rounded overflow-hidden">
+    <div class="px-6 py-5 border-b border-brand-gold/10 bg-[#151515] flex justify-between items-center">
+        <h3 class="text-lg font-serif text-brand-gold">Current Operations Log</h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-brand-black/50 text-brand-lightgold/50 text-[10px] uppercase tracking-widest border-b border-brand-gold/20">
+                    <th class="p-4 font-bold">Log ID</th>
+                    <th class="p-4 font-bold">Design/Category</th>
+                    <th class="p-4 font-bold">Start Date</th>
+                    <th class="p-4 font-bold">Quantity</th>
+                    <th class="p-4 font-bold">Est. Payout</th>
+                    <th class="p-4 font-bold">Status</th>
+                    <th class="p-4 font-bold text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm text-brand-lightgold divide-y divide-brand-gold/5" id="log-table-body">
+                {% for log in logs %}
+                <tr class="hover:bg-brand-gold/5 transition-colors group log-row" data-status="{{ log.status }}">
+                    <td class="p-4 font-mono text-xs text-brand-gold/70">#PL-{{ log.log_id }}</td>
+                    <td class="p-4">
+                        <p class="font-serif text-brand-gold font-bold">{{ log.design_name }}</p>
+                        <p class="text-xs text-brand-lightgold/50 mt-1 uppercase tracking-widest">{{ log.category }}</p>
+                    </td>
+                    <td class="p-4">{{ log.start_date.strftime('%d %b %Y') if log.start_date else 'N/A' }}</td>
+                    <td class="p-4 font-bold">{{ log.quantity }} Units</td>
+                    <td class="p-4 text-green-400 font-mono">₹{{ "{:,.2f}".format(log.payout_amount) if log.payout_amount else '0.00' }}</td>
+                    <td class="p-4">
+                        {% if log.status == 'In Progress' or log.status == 'Processing' %}
+                            <span class="bg-yellow-900/40 text-yellow-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-yellow-500/30 flex inline-flex items-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 mr-2 animate-pulse"></span>
+                                In Progress
+                            </span>
+                        {% elif log.status == 'Completed' or log.status == 'Shipped' %}
+                            <span class="bg-green-900/40 text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30 flex inline-flex items-center">
+                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Completed
+                            </span>
+                        {% elif log.status == 'Cancelled' %}
+                            <span class="bg-red-900/40 text-red-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-red-500/30">
+                                Cancelled
+                            </span>
+                        {% else %}
+                            <span class="bg-blue-900/40 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30">
+                                {{ log.status }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4 text-center">
+                        <button onclick="openStatusModal({{ log.log_id }}, '{{ log.status }}')" class="text-xs bg-brand-black hover:bg-brand-gold hover:text-brand-black text-brand-gold border border-brand-gold/30 px-3 py-1.5 rounded uppercase tracking-widest font-bold transition-all shadow-lg shadow-brand-gold/10">
+                            Update
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="p-12 text-center text-brand-lightgold/40 border-dashed border-2 border-brand-gold/10 m-4 rounded">
+                        <svg class="w-12 h-12 text-brand-gold/20 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        <p class="font-serif text-lg text-brand-gold mb-1">No Active Operations</p>
+                        <p class="text-xs">You currently do not have any weaving logs assigned to you.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div id="status-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-[#1a1a1a] border border-brand-gold/40 rounded-lg shadow-[0_0_40px_rgba(212,175,55,0.2)] w-full max-w-sm p-8 relative transform scale-95 transition-transform duration-300" id="status-modal-content">
+        <button onclick="closeStatusModal()" class="absolute top-4 right-4 text-brand-gold/50 hover:text-brand-gold">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <h3 class="text-2xl font-serif text-brand-gold mb-6">Update Status</h3>
+        <form onsubmit="event.preventDefault(); submitStatusUpdate();" class="space-y-4">
+            <input type="hidden" id="update-log-id">
+            
+            <div>
+                <label class="block text-xs text-brand-lightgold/70 mb-2 uppercase tracking-widest">New Production Status</label>
+                <select id="new-status" class="w-full bg-[#121212] border border-brand-gold/30 rounded p-3 text-brand-lightgold focus:border-brand-gold focus:outline-none appearance-none cursor-pointer text-sm">
+                    <option value="Active">Active / In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-brand-gold text-brand-black font-bold py-3 rounded hover:bg-yellow-500 transition-colors uppercase tracking-widest text-sm shadow-lg shadow-brand-gold/20">Save Status</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Log New Weave Modal -->
+<div id="new-weave-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-[#1a1a1a] border border-brand-gold/40 rounded-lg shadow-[0_0_40px_rgba(212,175,55,0.2)] w-full max-w-lg p-8 relative transform scale-95 transition-transform duration-300" id="new-weave-content">
+        <button onclick="closeNewWeaveModal()" class="absolute top-4 right-4 text-brand-gold/50 hover:text-brand-gold">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <h3 class="text-2xl font-serif text-brand-gold mb-6">Log New Weave</h3>
+        <form onsubmit="event.preventDefault(); submitNewWeave();" class="space-y-4">
+            <div>
+                <label class="block text-xs text-brand-lightgold/70 mb-2 uppercase tracking-widest">Select Design / Pattern</label>
+                <select id="nw-design-id" required class="w-full bg-[#121212] border border-brand-gold/30 rounded p-3 text-brand-lightgold focus:border-brand-gold focus:outline-none appearance-none cursor-pointer text-sm">
+                    <option value="" disabled selected>-- Choose Design --</option>
+                    {% for d in designs %}
+                    <option value="{{ d.design_id }}">{{ d.name }} ({{ d.region_origin }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-brand-lightgold/70 mb-2 uppercase tracking-widest">Quantity</label>
+                    <input type="number" id="nw-quantity" required min="1" placeholder="e.g. 5" class="w-full bg-[#121212] border border-brand-gold/30 rounded p-3 text-brand-lightgold focus:border-brand-gold focus:outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-brand-lightgold/70 mb-2 uppercase tracking-widest">Start Date</label>
+                    <input type="date" id="nw-start-date" required class="w-full bg-[#121212] border border-brand-gold/30 rounded p-3 text-brand-lightgold focus:border-brand-gold focus:outline-none text-sm">
+                </div>
+            </div>
+            
+            <div class="pt-4">
+                <button type="submit" class="w-full bg-brand-gold text-brand-black font-bold py-3 rounded hover:bg-yellow-500 transition-colors uppercase tracking-widest text-sm shadow-lg shadow-brand-gold/20">Start Production</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let filterActive = false;
+
+function toggleFilterActive() {
+    filterActive = !filterActive;
+    const btn = document.getElementById('filter-btn');
+    const rows = document.querySelectorAll('.log-row');
+    
+    if (filterActive) {
+        btn.classList.add('bg-brand-gold', 'text-brand-black');
+        btn.classList.remove('bg-brand-black', 'text-brand-lightgold');
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            if (status !== 'In Progress' && status !== 'Active' && status !== 'Processing') {
+                row.style.display = 'none';
+            }
+        });
+    } else {
+        btn.classList.remove('bg-brand-gold', 'text-brand-black');
+        btn.classList.add('bg-brand-black', 'text-brand-lightgold');
+        rows.forEach(row => row.style.display = '');
+    }
+}
+
+// Log New Weave Modal Functions
+function openNewWeaveModal() {
+    // Set default date to today
+    document.getElementById('nw-start-date').valueAsDate = new Date();
+    
+    const modal = document.getElementById('new-weave-modal');
+    const content = document.getElementById('new-weave-content');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+    }, 10);
+}
+
+function closeNewWeaveModal() {
+    const modal = document.getElementById('new-weave-modal');
+    const content = document.getElementById('new-weave-content');
+    modal.classList.add('opacity-0');
+    content.classList.add('scale-95');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 300);
+}
+
+async function submitNewWeave() {
+    const designId = document.getElementById('nw-design-id').value;
+    const qty = document.getElementById('nw-quantity').value;
+    const date = document.getElementById('nw-start-date').value;
+    const btn = document.querySelector('#new-weave-modal button[type="submit"]');
+    
+    btn.innerHTML = 'Starting...';
+    btn.disabled = true;
+    
+    try {
+        const res = await fetch(`/api/artisan/production/new`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ design_id: designId, quantity: qty, start_date: date })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || 'Failed to log new weave');
+        }
+    } catch(e) {
+        alert('Network error while creating log');
+    } finally {
+        btn.innerHTML = 'Start Production';
+        btn.disabled = false;
+        closeNewWeaveModal();
+    }
+}
+function openStatusModal(logId, currentStatus) {
+    document.getElementById('update-log-id').value = logId;
+    
+    // Normalize status string mapping
+    let val = "Active";
+    if (currentStatus === 'Completed' || currentStatus === 'Shipped') val = 'Completed';
+    else if (currentStatus === 'Cancelled') val = 'Cancelled';
+    
+    document.getElementById('new-status').value = val;
+    
+    const modal = document.getElementById('status-modal');
+    const content = document.getElementById('status-modal-content');
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    
+    // Trigger animations
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+    }, 10);
+}
+
+function closeStatusModal() {
+    const modal = document.getElementById('status-modal');
+    const content = document.getElementById('status-modal-content');
+    
+    modal.classList.add('opacity-0');
+    content.classList.add('scale-95');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 300);
+}
+
+async function submitStatusUpdate() {
+    const logId = document.getElementById('update-log-id').value;
+    const newStatus = document.getElementById('new-status').value;
+    const btn = document.querySelector('#status-modal button[type="submit"]');
+    
+    btn.innerHTML = 'Saving...';
+    btn.disabled = true;
+    
+    try {
+        const res = await fetch(`/api/artisan/production/${logId}/status`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({status: newStatus})
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.error || 'Failed to update status');
+        }
+    } catch(e) {
+        alert('Network error while updating status');
+    } finally {
+        btn.innerHTML = 'Save Status';
+        btn.disabled = false;
+        closeStatusModal();
+    }
+}
+</script>
+{% endblock %}

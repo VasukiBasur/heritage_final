@@ -1,0 +1,94 @@
+{% extends 'admin_base_layout.html' %}
+
+{% block title %}Production{% endblock %}
+{% block header_title %}Production Management{% endblock %}
+
+{% block content %}
+
+
+        <!-- Flash Messages -->
+        
+
+            <div class="flex justify-between items-center mb-8 border-b border-brand-gold/20 pb-4">
+                <h2 class="text-3xl font-serif font-bold text-brand-gold">Production Tracking</h2>
+                <a href="{{ url_for('add_log') }}" class="bg-brand-gold text-brand-black px-4 py-2 rounded text-sm font-bold hover:bg-yellow-500 transition-colors inline-block">+ Add New</a>
+            </div>
+            
+            <div class="glass-card rounded-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    
+<table>
+    <thead><tr><th>Batch ID</th><th>Design</th><th>Artisan</th><th>Start Date</th><th>Stage</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>#BCH-{{ log.log_id }}</td>
+            <td class="font-bold text-brand-gold">{{ log.design_name }}</td>
+            <td>{{ log.artisan_name }}</td>
+            <td>{{ log.start_date }}</td>
+            <td>
+                <form action="{{ url_for('update_stage', log_id=log.log_id) }}" method="POST" class="flex items-center space-x-2">
+                    <select name="stage" class="bg-brand-dark border border-brand-gold/30 text-xs px-2 py-1 rounded text-brand-lightgold focus:outline-none focus:border-brand-gold">
+                        <option value="Ordered" {% if log.stage == 'Ordered' %}selected{% endif %}>Ordered</option>
+                        <option value="Raw_Material_Supply" {% if log.stage == 'Raw_Material_Supply' %}selected{% endif %}>Raw Material Supply</option>
+                        <option value="Manufacturing" {% if log.stage == 'Manufacturing' %}selected{% endif %}>Manufacturing</option>
+                        <option value="Distribution" {% if log.stage == 'Distribution' %}selected{% endif %}>Distribution</option>
+                        <option value="Retail" {% if log.stage == 'Retail' %}selected{% endif %}>Retail</option>
+                        <option value="Sold" {% if log.stage == 'Sold' %}selected{% endif %}>Sold</option>
+                    </select>
+            </td>
+            <td><span class="px-2 py-1 bg-brand-gold/10 text-brand-gold border border-brand-gold/30 rounded-full text-[10px] uppercase">{{ log.status }}</span></td>
+            <td><button type="submit" class="text-xs text-green-400 hover:underline px-2 py-1 border border-green-400/30 rounded bg-green-900/30">Save</button></form></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+                </div>
+            </div>
+        
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInputs = document.querySelectorAll('input[type="text"][placeholder*="Search"]');
+            searchInputs.forEach(searchInput => {
+                searchInput.addEventListener("input", function(e) {
+                    const query = e.target.value.toLowerCase();
+                    
+                    // Filter Table Rows
+                    const tables = document.querySelectorAll("table tbody");
+                    tables.forEach(tbody => {
+                        const rows = tbody.querySelectorAll("tr");
+                        rows.forEach(row => {
+                            if (row.innerText.toLowerCase().includes(query)) {
+                                row.style.display = "";
+                            } else {
+                                row.style.display = "none";
+                            }
+                        });
+                    });
+
+                    // Filter Glass Cards (for Modules like Designs/Materials)
+                    const cards = document.querySelectorAll(".glass-card");
+                    cards.forEach(card => {
+                        // Avoid filtering structural glass cards (like dashboard charts)
+                        if (card.parentElement && card.parentElement.tagName === 'BODY') return;
+                        if (card.querySelector('canvas')) return; // ignore charts
+                        
+                        // Only filter if it's likely a grid card
+                        if (card.innerText.toLowerCase().includes(query)) {
+                            if(card.parentElement && card.parentElement.style) card.parentElement.style.display = "block";
+                            card.style.display = "block";
+                        } else {
+                            if(card.parentElement && card.parentElement.style && card.parentElement.tagName !== 'DIV') card.parentElement.style.display = "none";
+                            card.style.display = "none";
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

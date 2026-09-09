@@ -1,0 +1,494 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Active Deliveries{% endblock %}
+{% block header_title %}Active Deliveries & Routing{% endblock %}
+
+{% block content %}
+<script async defer src="https://maps.googleapis.com/maps/api/js?callback=initMap"></script>
+
+<!-- Leaflet CSS & JS -->
+
+<style>
+    /* Custom Leaflet Tooltip Styling for Dark Theme */
+    .leaflet-tooltip.dark-tooltip {
+        background-color: #141414;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        color: #f5ebd7;
+        box-shadow: 0 0 15px rgba(0,0,0,0.8);
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-family: inherit;
+    }
+    .leaflet-tooltip.dark-tooltip::before {
+        border-top-color: rgba(212, 175, 55, 0.3);
+    }
+    .leaflet-popup-content-wrapper {
+        background-color: #1a1a1a;
+        color: #f5ebd7;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        border-radius: 8px;
+    }
+    .leaflet-popup-tip {
+        background-color: #1a1a1a;
+    }
+</style>
+
+<div class="mb-8 flex justify-between items-end">
+    <div>
+        <h2 class="text-4xl font-serif text-[#f5ebd7] drop-shadow-md">Active Transits</h2>
+        <p class="text-sm text-[#d4af37]/70 mt-2 tracking-wide font-light">Monitor your fleet and update delivery statuses in real-time.</p>
+    </div>
+    <div class="flex space-x-4">
+        
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-10">
+    <!-- Transit Card 1 -->
+    <div class="bg-gradient-to-br from-[#1a1a1a] to-black border border-[#d4af37]/30 rounded-xl p-6 shadow-2xl relative overflow-hidden group">
+        <div class="absolute right-0 top-0 w-32 h-32 bg-[#d4af37]/5 rounded-bl-full group-hover:bg-[#d4af37]/10 transition-colors"></div>
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <div>
+                <span class="text-xs font-mono text-[#d4af37]/70 bg-[#d4af37]/10 px-2 py-1 rounded border border-[#d4af37]/20">TRK-9021-A</span>
+                <h4 class="text-lg font-serif text-[#f5ebd7] mt-3">Heritage Hub &rarr; Retail Store</h4>
+                <p class="text-[10px] text-[#f5ebd7]/50 mt-1 uppercase tracking-widest">Cargo: 140kg Assorted Textiles</p>
+            </div>
+            <span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]">In Transit</span>
+        </div>
+        
+        <div class="mb-6 relative z-10">
+            <div class="flex justify-between text-xs text-[#f5ebd7]/60 mb-2 font-semibold">
+                <span>Departed 09:15 AM</span>
+                <span>ETA: 01:30 PM</span>
+            </div>
+            <div class="w-full bg-[#141414] rounded-full h-2 border border-[#d4af37]/10 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-full rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)] relative" style="width: 60%">
+                    <span class="absolute -right-1 -top-[2px] w-3 h-3 bg-white rounded-full border-2 border-blue-500 animate-pulse"></span>
+                </div>
+            </div>
+            <div class="mt-2 text-right text-[10px] text-[#d4af37]/50 font-mono">14.2 km remaining</div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs relative z-10 pt-4 border-t border-[#d4af37]/10">
+            <div class="flex items-center text-[#d4af37]/80">
+                <div class="w-6 h-6 rounded-full bg-[#8b4513] text-white flex items-center justify-center font-bold text-[9px] mr-2">SP</div>
+                <span>Shyam P. (Truck A)</span>
+            </div>
+            <button onclick="updateDeliveryStatus(this)" class="text-black bg-gradient-to-r from-[#d4af37] to-[#b8860b] px-4 py-2 rounded shadow-lg hover:brightness-110 transition-all font-bold uppercase tracking-widest text-[10px]">Mark Delivered</button>
+        </div>
+    </div>
+    
+    <!-- Transit Card 2 -->
+    <div class="bg-gradient-to-br from-[#1a1a1a] to-black border border-[#d4af37]/10 rounded-xl p-6 shadow-2xl relative overflow-hidden group opacity-90">
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <div>
+                <span class="text-xs font-mono text-[#d4af37]/50 bg-[#d4af37]/5 px-2 py-1 rounded border border-[#d4af37]/10">TRK-9022-B</span>
+                <h4 class="text-lg font-serif text-[#f5ebd7]/80 mt-3">Udupi Artisan &rarr; Ctrl Hub</h4>
+                <p class="text-[10px] text-[#f5ebd7]/40 mt-1 uppercase tracking-widest">Cargo: 28kg Cotton Stoles</p>
+            </div>
+            <span class="bg-[#d4af37]/20 text-[#d4af37] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-[#d4af37]/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">Out for Delivery</span>
+        </div>
+        
+        <div class="mb-6 relative z-10">
+            <div class="flex justify-between text-xs text-[#f5ebd7]/50 mb-2 font-semibold">
+                <span>Departed 11:45 AM</span>
+                <span>ETA: 12:15 PM</span>
+            </div>
+            <div class="w-full bg-[#141414] rounded-full h-2 border border-[#d4af37]/10 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#8b4513] to-[#d4af37] h-full rounded-full shadow-[0_0_8px_rgba(212,175,55,0.6)] relative" style="width: 90%">
+                    <span class="absolute -right-1 -top-[2px] w-3 h-3 bg-white rounded-full border-2 border-[#d4af37] animate-pulse"></span>
+                </div>
+            </div>
+            <div class="mt-2 text-right text-[10px] text-[#d4af37]/40 font-mono">1.8 km remaining</div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs relative z-10 pt-4 border-t border-[#d4af37]/5">
+            <div class="flex items-center text-[#d4af37]/60">
+                <div class="w-6 h-6 rounded-full bg-[#1a1a1a] border border-[#d4af37]/30 text-[#d4af37] flex items-center justify-center font-bold text-[9px] mr-2">AM</div>
+                <span>Ali M. (Truck B)</span>
+            </div>
+            <button onclick="updateDeliveryStatus(this)" class="text-[#f5ebd7] bg-[#d4af37]/10 px-4 py-2 rounded border border-[#d4af37]/20 hover:bg-[#d4af37]/30 transition-colors font-bold uppercase tracking-widest text-[10px]">Mark Delivered</button>
+        </div>
+    </div>
+    
+    <!-- Transit Card 3 -->
+    <div class="bg-gradient-to-br from-[#1a1a1a] to-black border border-red-500/20 rounded-xl p-6 shadow-2xl relative overflow-hidden group">
+        <div class="absolute right-0 top-0 w-32 h-32 bg-red-900/5 rounded-bl-full group-hover:bg-red-900/10 transition-colors"></div>
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <div>
+                <span class="text-xs font-mono text-[#d4af37]/50 bg-[#d4af37]/5 px-2 py-1 rounded border border-[#d4af37]/10">VAN-4011</span>
+                <h4 class="text-lg font-serif text-[#f5ebd7] mt-3">Mysore Silk Coop &rarr; Hub</h4>
+                <p class="text-[10px] text-[#ff9999]/80 mt-1 uppercase tracking-widest font-bold">Traffic Delay Reported</p>
+            </div>
+            <span class="bg-red-900/30 text-red-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-red-500/30 shadow-[0_0_10px_rgba(220,38,38,0.2)]">Delayed</span>
+        </div>
+        
+        <div class="mb-6 relative z-10">
+            <div class="flex justify-between text-xs text-[#f5ebd7]/50 mb-2 font-semibold">
+                <span>Departed 08:00 AM</span>
+                <span class="text-red-400">ETA: 04:45 PM (Revised)</span>
+            </div>
+            <div class="w-full bg-[#141414] rounded-full h-2 border border-[#d4af37]/10 overflow-hidden">
+                <div class="bg-gradient-to-r from-red-800 to-red-500 h-full rounded-full shadow-[0_0_8px_rgba(220,38,38,0.6)] relative" style="width: 35%">
+                    <span class="absolute -right-1 -top-[2px] w-3 h-3 bg-red-200 rounded-full border-2 border-red-500 animate-pulse"></span>
+                </div>
+            </div>
+            <div class="mt-2 text-right text-[10px] text-[#d4af37]/40 font-mono">45.0 km remaining</div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs relative z-10 pt-4 border-t border-[#d4af37]/10">
+            <div class="flex items-center text-[#d4af37]/80">
+                <div class="w-6 h-6 rounded-full bg-[#8b4513] text-white flex items-center justify-center font-bold text-[9px] mr-2">V</div>
+                <span>Venkatesh (Van 1)</span>
+            </div>
+            <button onclick="updateDeliveryStatus(this)" class="text-[#f5ebd7] bg-red-900/20 px-4 py-2 rounded border border-red-500/30 hover:bg-red-900/40 transition-colors font-bold uppercase tracking-widest text-[10px]">Mark Delivered</button>
+        </div>
+    </div>
+
+    <!-- Transit Card 4 -->
+    <div class="bg-gradient-to-br from-[#1a1a1a] to-black border border-[#d4af37]/30 rounded-xl p-6 shadow-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <div>
+                <span class="text-xs font-mono text-[#d4af37]/70 bg-[#d4af37]/10 px-2 py-1 rounded border border-[#d4af37]/20">TRK-9045-C</span>
+                <h4 class="text-lg font-serif text-[#f5ebd7] mt-3">Hubli Zone &rarr; Retail Store</h4>
+                <p class="text-[10px] text-[#f5ebd7]/50 mt-1 uppercase tracking-widest">Cargo: 210kg Kasuti Shawls</p>
+            </div>
+            <span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]">In Transit</span>
+        </div>
+        
+        <div class="mb-6 relative z-10">
+            <div class="flex justify-between text-xs text-[#f5ebd7]/60 mb-2 font-semibold">
+                <span>Departed 06:30 AM</span>
+                <span>ETA: 02:45 PM</span>
+            </div>
+            <div class="w-full bg-[#141414] rounded-full h-2 border border-[#d4af37]/10 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-full rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)] relative" style="width: 75%">
+                    <span class="absolute -right-1 -top-[2px] w-3 h-3 bg-white rounded-full border-2 border-blue-500 animate-pulse"></span>
+                </div>
+            </div>
+            <div class="mt-2 text-right text-[10px] text-[#d4af37]/50 font-mono">22.4 km remaining</div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs relative z-10 pt-4 border-t border-[#d4af37]/10">
+            <div class="flex items-center text-[#d4af37]/80">
+                <div class="w-6 h-6 rounded-full bg-[#5a0000] text-white flex items-center justify-center font-bold text-[9px] mr-2">RM</div>
+                <span>Ramesh M. (Truck C)</span>
+            </div>
+            <button onclick="updateDeliveryStatus(this)" class="text-black bg-gradient-to-r from-[#d4af37] to-[#b8860b] px-4 py-2 rounded shadow-lg hover:brightness-110 transition-all font-bold uppercase tracking-widest text-[10px]">Mark Delivered</button>
+        </div>
+    </div>
+
+    <!-- Transit Card 5 -->
+    <div class="bg-gradient-to-br from-[#1a1a1a] to-black border border-[#d4af37]/10 rounded-xl p-6 shadow-2xl relative overflow-hidden group opacity-90">
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <div>
+                <span class="text-xs font-mono text-[#d4af37]/50 bg-[#d4af37]/5 px-2 py-1 rounded border border-[#d4af37]/10">VAN-4022</span>
+                <h4 class="text-lg font-serif text-[#f5ebd7]/80 mt-3">Bangalore S. &rarr; Ctrl Hub</h4>
+                <p class="text-[10px] text-[#f5ebd7]/40 mt-1 uppercase tracking-widest">Cargo: 15kg Zari Borders</p>
+            </div>
+            <span class="bg-[#d4af37]/20 text-[#d4af37] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-[#d4af37]/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">Out for Delivery</span>
+        </div>
+        
+        <div class="mb-6 relative z-10">
+            <div class="flex justify-between text-xs text-[#f5ebd7]/50 mb-2 font-semibold">
+                <span>Departed 12:30 PM</span>
+                <span>ETA: 01:00 PM</span>
+            </div>
+            <div class="w-full bg-[#141414] rounded-full h-2 border border-[#d4af37]/10 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#8b4513] to-[#d4af37] h-full rounded-full shadow-[0_0_8px_rgba(212,175,55,0.6)] relative" style="width: 85%">
+                    <span class="absolute -right-1 -top-[2px] w-3 h-3 bg-white rounded-full border-2 border-[#d4af37] animate-pulse"></span>
+                </div>
+            </div>
+            <div class="mt-2 text-right text-[10px] text-[#d4af37]/40 font-mono">3.2 km remaining</div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs relative z-10 pt-4 border-t border-[#d4af37]/5">
+            <div class="flex items-center text-[#d4af37]/60">
+                <div class="w-6 h-6 rounded-full bg-[#1a1a1a] border border-[#d4af37]/30 text-[#d4af37] flex items-center justify-center font-bold text-[9px] mr-2">KT</div>
+                <span>Karthik T. (Van 2)</span>
+            </div>
+            <button onclick="updateDeliveryStatus(this)" class="text-[#f5ebd7] bg-[#d4af37]/10 px-4 py-2 rounded border border-[#d4af37]/20 hover:bg-[#d4af37]/30 transition-colors font-bold uppercase tracking-widest text-[10px]">Mark Delivered</button>
+        </div>
+    </div>
+
+    <!-- Transit Card 6 -->
+    <div class="bg-gradient-to-br from-[#1a1a1a] to-black border border-[#d4af37]/30 rounded-xl p-6 shadow-2xl relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <div>
+                <span class="text-xs font-mono text-[#d4af37]/70 bg-[#d4af37]/10 px-2 py-1 rounded border border-[#d4af37]/20">TRK-9051-D</span>
+                <h4 class="text-lg font-serif text-[#f5ebd7] mt-3">Ilkal Center &rarr; Retail Store</h4>
+                <p class="text-[10px] text-[#f5ebd7]/50 mt-1 uppercase tracking-widest">Cargo: 180kg Checked Sarees</p>
+            </div>
+            <span class="bg-blue-900/30 text-blue-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-blue-500/30 shadow-[0_0_10px_rgba(59,130,246,0.2)]">In Transit</span>
+        </div>
+        
+        <div class="mb-6 relative z-10">
+            <div class="flex justify-between text-xs text-[#f5ebd7]/60 mb-2 font-semibold">
+                <span>Departed 08:15 AM</span>
+                <span>ETA: 03:30 PM</span>
+            </div>
+            <div class="w-full bg-[#141414] rounded-full h-2 border border-[#d4af37]/10 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-full rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)] relative" style="width: 45%">
+                    <span class="absolute -right-1 -top-[2px] w-3 h-3 bg-white rounded-full border-2 border-blue-500 animate-pulse"></span>
+                </div>
+            </div>
+            <div class="mt-2 text-right text-[10px] text-[#d4af37]/50 font-mono">82.1 km remaining</div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs relative z-10 pt-4 border-t border-[#d4af37]/10">
+            <div class="flex items-center text-[#d4af37]/80">
+                <div class="w-6 h-6 rounded-full bg-[#8b4513] text-white flex items-center justify-center font-bold text-[9px] mr-2">PR</div>
+                <span>Pradeep R. (Truck D)</span>
+            </div>
+            <button onclick="updateDeliveryStatus(this)" class="text-black bg-gradient-to-r from-[#d4af37] to-[#b8860b] px-4 py-2 rounded shadow-lg hover:brightness-110 transition-all font-bold uppercase tracking-widest text-[10px]">Mark Delivered</button>
+        </div>
+    </div>
+    
+    <!-- Transit Card 7 -->
+    <div class="bg-gradient-to-br from-[#1a1a1a] to-black border border-[#d4af37]/10 rounded-xl p-6 shadow-2xl relative overflow-hidden group opacity-90">
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <div>
+                <span class="text-xs font-mono text-[#d4af37]/50 bg-[#d4af37]/5 px-2 py-1 rounded border border-[#d4af37]/10">VAN-4025</span>
+                <h4 class="text-lg font-serif text-[#f5ebd7]/80 mt-3">Mangalore Port &rarr; Hub</h4>
+                <p class="text-[10px] text-[#f5ebd7]/40 mt-1 uppercase tracking-widest">Cargo: 65kg Silk Threads</p>
+            </div>
+            <span class="bg-[#d4af37]/20 text-[#d4af37] text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-[#d4af37]/30 shadow-[0_0_10px_rgba(212,175,55,0.1)]">Out for Delivery</span>
+        </div>
+        
+        <div class="mb-6 relative z-10">
+            <div class="flex justify-between text-xs text-[#f5ebd7]/50 mb-2 font-semibold">
+                <span>Departed 10:45 AM</span>
+                <span>ETA: 01:15 PM</span>
+            </div>
+            <div class="w-full bg-[#141414] rounded-full h-2 border border-[#d4af37]/10 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#8b4513] to-[#d4af37] h-full rounded-full shadow-[0_0_8px_rgba(212,175,55,0.6)] relative" style="width: 95%">
+                    <span class="absolute -right-1 -top-[2px] w-3 h-3 bg-white rounded-full border-2 border-[#d4af37] animate-pulse"></span>
+                </div>
+            </div>
+            <div class="mt-2 text-right text-[10px] text-[#d4af37]/40 font-mono">0.5 km remaining</div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs relative z-10 pt-4 border-t border-[#d4af37]/5">
+            <div class="flex items-center text-[#d4af37]/60">
+                <div class="w-6 h-6 rounded-full bg-[#1a1a1a] border border-[#d4af37]/30 text-[#d4af37] flex items-center justify-center font-bold text-[9px] mr-2">DN</div>
+                <span>Dinesh N. (Van 3)</span>
+            </div>
+            <button onclick="updateDeliveryStatus(this)" class="text-[#f5ebd7] bg-[#d4af37]/10 px-4 py-2 rounded border border-[#d4af37]/20 hover:bg-[#d4af37]/30 transition-colors font-bold uppercase tracking-widest text-[10px]">Mark Delivered</button>
+        </div>
+    </div>
+    
+    <!-- Transit Card 8 -->
+    <div class="bg-gradient-to-br from-[#1a1a1a] to-black border border-red-500/20 rounded-xl p-6 shadow-2xl relative overflow-hidden group">
+        <div class="absolute right-0 top-0 w-32 h-32 bg-red-900/5 rounded-bl-full group-hover:bg-red-900/10 transition-colors"></div>
+        <div class="flex justify-between items-start mb-6 relative z-10">
+            <div>
+                <span class="text-xs font-mono text-[#d4af37]/50 bg-[#d4af37]/5 px-2 py-1 rounded border border-[#d4af37]/10">TRK-9055-E</span>
+                <h4 class="text-lg font-serif text-[#f5ebd7] mt-3">Hubli Zone &rarr; Mysore Hub</h4>
+                <p class="text-[10px] text-[#ff9999]/80 mt-1 uppercase tracking-widest font-bold">Vehicle Breakdown</p>
+            </div>
+            <span class="bg-red-900/30 text-red-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-red-500/30 shadow-[0_0_10px_rgba(220,38,38,0.2)]">Delayed</span>
+        </div>
+        
+        <div class="mb-6 relative z-10">
+            <div class="flex justify-between text-xs text-[#f5ebd7]/50 mb-2 font-semibold">
+                <span>Departed 07:00 AM</span>
+                <span class="text-red-400">ETA: Unknown</span>
+            </div>
+            <div class="w-full bg-[#141414] rounded-full h-2 border border-[#d4af37]/10 overflow-hidden">
+                <div class="bg-gradient-to-r from-red-800 to-red-500 h-full rounded-full shadow-[0_0_8px_rgba(220,38,38,0.6)] relative" style="width: 55%">
+                    <span class="absolute -right-1 -top-[2px] w-3 h-3 bg-red-200 rounded-full border-2 border-red-500 animate-pulse"></span>
+                </div>
+            </div>
+            <div class="mt-2 text-right text-[10px] text-[#d4af37]/40 font-mono">145.0 km remaining</div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs relative z-10 pt-4 border-t border-[#d4af37]/10">
+            <div class="flex items-center text-[#d4af37]/80">
+                <div class="w-6 h-6 rounded-full bg-[#800000] text-white flex items-center justify-center font-bold text-[9px] mr-2">SG</div>
+                <span>Suresh G. (Truck E)</span>
+            </div>
+            <button onclick="updateDeliveryStatus(this)" class="text-[#f5ebd7] bg-red-900/20 px-4 py-2 rounded border border-red-500/30 hover:bg-red-900/40 transition-colors font-bold uppercase tracking-widest text-[10px]">Mark Delivered</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateDeliveryStatus(btn) {
+        const card = btn.closest('.group');
+        const badge = card.querySelector('span[class*="tracking-widest"]');
+        badge.innerText = 'Delivered';
+        badge.className = 'bg-green-900/30 text-green-400 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded border border-green-500/30 shadow-[0_0_10px_rgba(74,222,128,0.2)]';
+        btn.innerText = 'Completed';
+        btn.className = 'text-green-400 bg-green-900/20 px-4 py-2 rounded border border-green-500/30 font-bold uppercase tracking-widest text-[10px] opacity-50 cursor-not-allowed';
+        btn.disabled = true;
+        if(card.classList.contains('border-red-500/20')) {
+            card.classList.remove('border-red-500/20');
+            card.classList.add('border-green-500/20');
+            const delayText = card.querySelector('p.text-\[\#ff9999\]\/80');
+            if (delayText) delayText.innerText = "Resolved & Delivered";
+        }
+        const bar = card.querySelector('.rounded-full.h-2 > div');
+        if (bar) {
+            bar.style.width = '100%';
+            bar.className = 'bg-gradient-to-r from-green-600 to-green-400 h-full rounded-full shadow-[0_0_8px_rgba(74,222,128,0.6)] relative transition-all duration-1000';
+            const pulse = bar.querySelector('span');
+            if(pulse) pulse.remove();
+        }
+        const remaining = card.querySelector('.font-mono:last-of-type');
+        if(remaining) remaining.innerText = "0.0 km remaining";
+    }
+
+    let mapInstance = null;
+
+    function initMap() {
+        if (mapInstance !== null) return; // Already initialized
+
+        // Initialize map centered on Karnataka
+        mapInstance = L.map('delivery-map').setView([14.1670, 75.0403], 7);
+
+        // CartoDB Dark Matter tiles
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(mapInstance);
+
+        // Define Icons
+        const pickupIcon = L.divIcon({
+            html: `<div class="w-4 h-4 rounded-full bg-[#8b4513] border-2 border-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.8)]"></div>`,
+            className: '',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        const destIcon = L.divIcon({
+            html: `<div class="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>`,
+            className: '',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        const truckIcon = L.divIcon({
+            html: `<div class="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,1)] border-2 border-[#d4af37] animate-pulse"><svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg></div>`,
+            className: '',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+
+        // Hub Coordinates
+        const hubs = {
+            mysore: [12.2958, 76.6394],
+            bangalore: [12.9716, 77.5946],
+            udupi: [13.3409, 74.7421],
+            hubli: [15.3647, 75.1240],
+            mangalore: [12.9141, 74.8560]
+        };
+
+        // Routes Data
+        const routes = [
+            {
+                start: hubs.mysore,
+                end: hubs.bangalore,
+                color: '#3b82f6', // Blue (In Transit)
+                label: "TRK-9021-A | Cargo: 140kg Textiles",
+                eta: "01:30 PM",
+                progress: 0.6
+            },
+            {
+                start: hubs.udupi,
+                end: hubs.bangalore,
+                color: '#d4af37', // Gold (Out for Delivery)
+                label: "TRK-9022-B | Cargo: 28kg Stoles",
+                eta: "12:15 PM",
+                progress: 0.9
+            },
+            {
+                start: hubs.hubli,
+                end: hubs.mysore,
+                color: '#ef4444', // Red (Delayed)
+                label: "TRK-9055-E | Vehicle Breakdown",
+                eta: "Unknown",
+                progress: 0.55
+            }
+        ];
+
+        routes.forEach(route => {
+            // Draw Polyline
+            L.polyline([route.start, route.end], {
+                color: route.color,
+                weight: 3,
+                opacity: 0.5,
+                dashArray: '10, 10'
+            }).addTo(mapInstance);
+
+            // Add Pickup Pin
+            L.marker(route.start, {icon: pickupIcon})
+                .bindTooltip("Pickup Point", {direction: 'top', className: 'dark-tooltip'})
+                .addTo(mapInstance);
+
+            // Add Destination Pin
+            L.marker(route.end, {icon: destIcon})
+                .bindTooltip("Delivery Hub", {direction: 'top', className: 'dark-tooltip'})
+                .addTo(mapInstance);
+
+            // Calculate current truck position based on progress
+            const lat = route.start[0] + (route.end[0] - route.start[0]) * route.progress;
+            const lng = route.start[1] + (route.end[1] - route.start[1]) * route.progress;
+
+            // Add Animated Truck Pin
+            const truck = L.marker([lat, lng], {icon: truckIcon}).addTo(mapInstance);
+            
+            // Add rich tooltip to truck
+            const tooltipContent = `
+                <div class="font-sans text-xs">
+                    <strong class="text-[#d4af37] uppercase tracking-widest block mb-1 font-mono">${route.label.split('|')[0]}</strong>
+                    <div class="mb-1">${route.label.split('|')[1]}</div>
+                    <div class="text-gray-400">ETA: <span class="text-white">${route.eta}</span></div>
+                </div>
+            `;
+            truck.bindTooltip(tooltipContent, {direction: 'auto', className: 'dark-tooltip', permanent: false});
+        });
+    }
+
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+    });
+
+    function openMapModal() {
+        const modal = document.getElementById('map-modal');
+        const content = document.getElementById('map-modal-content');
+        
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+        
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+            
+            // Initialize Leaflet Map safely after modal renders
+            initMap();
+            // Force Leaflet to recalculate container size so tiles load correctly
+            setTimeout(() => {
+                if(mapInstance) mapInstance.invalidateSize();
+            }, 300);
+            
+        }, 50);
+    }
+
+    function closeMapModal() {
+        const modal = document.getElementById('map-modal');
+        const content = document.getElementById('map-modal-content');
+        
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }, 300);
+    }
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,35 @@
+========================================================================
+KEY SQL QUERIES FOR REPORT (CHAPTER 5)
+========================================================================
+
+1. Artisan Dashboard JOIN Query
+This query retrieves all production logs specific to the currently logged-in artisan, executing a multi-table JOIN to fetch readable names for both the artisan and the specific traditional design.
+
+SELECT p.*, a.name as artisan_name, d.name as design_name
+FROM production_logs p
+JOIN artisans a ON p.artisan_id = a.artisan_id
+JOIN traditional_designs d ON p.design_id = d.design_id
+WHERE p.artisan_id = %s
+ORDER BY p.start_date DESC;
+
+------------------------------------------------------------------------
+
+2. Analytics Aggregation Query (Chart.js Feed)
+This query calculates the total production volume segmented by each traditional design type. It uses the aggregate COUNT() function combined with GROUP BY to feed the JSON API that powers the frontend Bar Chart.
+
+SELECT d.name, COUNT(p.log_id) as count
+FROM production_logs p
+JOIN traditional_designs d ON p.design_id = d.design_id
+GROUP BY d.design_id, d.name;
+
+------------------------------------------------------------------------
+
+3. Total Payouts Aggregation JOIN
+This query dynamically calculates the total combined lifetime earnings (payouts) for every artisan in the system. It uses a LEFT JOIN to ensure artisans with no logs still appear, and COALESCE() to gracefully handle NULL values.
+
+SELECT a.*, COALESCE(SUM(p.payout_amount), 0) as total_payout
+FROM artisans a
+LEFT JOIN production_logs p ON a.artisan_id = p.artisan_id
+GROUP BY a.artisan_id;
+
+------------------------------------------------------------------------

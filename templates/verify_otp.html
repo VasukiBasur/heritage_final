@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - Heritage Handloom</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { brand: { black: '#121212', dark: '#1a1a1a', gold: '#d4af37', lightgold: '#f0e6d2' } }, fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] } } } }
+    </script>
+    <style>
+        body { background-color: #121212; color: #e5e5e5; }
+        .glass-card { background: rgba(26, 26, 26, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(212, 175, 55, 0.2); }
+        .otp-input { background-color: rgba(0,0,0,0.5); color: #f0e6d2; border: 1px solid rgba(212, 175, 55, 0.3); text-align: center; font-size: 1.5rem; }
+        .otp-input:focus { border-color: #d4af37; outline: none; box-shadow: 0 0 0 1px #d4af37; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-cover bg-center w-full" style="background-image: linear-gradient(rgba(18, 18, 18, 0.8), rgba(18, 18, 18, 0.9)), url('{{ url_for('static', filename='images/saree.png') }}');">
+    <div class="glass-card p-10 rounded-sm shadow-2xl w-full max-w-md border-t-4 border-t-brand-gold mx-4">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-serif font-bold text-brand-gold mb-2">Verify Identity</h1>
+            <p class="text-brand-lightgold/60 text-sm">We've sent a 6-digit code to your email.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('reset_password') }}" class="space-y-6">
+            <div class="flex justify-between gap-2 mb-6">
+                <input type="text" name="otp1" maxlength="1" class="otp-input w-12 h-14 rounded-sm" autofocus required onkeyup="moveToNext(this, event)">
+                <input type="text" name="otp2" maxlength="1" class="otp-input w-12 h-14 rounded-sm" required onkeyup="moveToNext(this, event)">
+                <input type="text" name="otp3" maxlength="1" class="otp-input w-12 h-14 rounded-sm" required onkeyup="moveToNext(this, event)">
+                <input type="text" name="otp4" maxlength="1" class="otp-input w-12 h-14 rounded-sm" required onkeyup="moveToNext(this, event)">
+                <input type="text" name="otp5" maxlength="1" class="otp-input w-12 h-14 rounded-sm" required onkeyup="moveToNext(this, event)">
+                <input type="text" name="otp6" maxlength="1" class="otp-input w-12 h-14 rounded-sm" required onkeyup="moveToNext(this, event)">
+            </div>
+            
+            <button type="submit" class="w-full bg-brand-gold hover:bg-yellow-500 text-brand-black font-bold uppercase tracking-widest py-4 px-4 rounded-sm transition-colors shadow-lg">
+                Verify Code
+            </button>
+            
+            <p class="text-center text-sm text-brand-lightgold/50 mt-4">
+                Didn't receive the code? <a href="#" class="text-brand-gold hover:text-yellow-400">Resend</a>
+            </p>
+        </form>
+    </div>
+
+    <script>
+        function moveToNext(current, event) {
+            if (current.value.length === 1 && current.nextElementSibling) {
+                current.nextElementSibling.focus();
+            }
+            if (event.key === "Backspace" && current.previousElementSibling) {
+                current.previousElementSibling.focus();
+            }
+        }
+    </script>
+</body>
+</html>

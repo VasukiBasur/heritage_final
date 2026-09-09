@@ -1,0 +1,626 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Delivery Schedule{% endblock %}
+{% block header_title %}Delivery Schedule & Dispatch{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div>
+        <h2 class="text-4xl font-serif text-[#f5ebd7] drop-shadow-md">Dispatch Calendar</h2>
+        <p class="text-sm text-[#d4af37]/70 mt-2 tracking-wide font-light">Manage upcoming pick-ups, dispatch windows, and fleet availability.</p>
+    </div>
+    <div class="flex space-x-4">
+        <button onclick="changeWeek(-1)" class="bg-[#1a1a1a] border border-[#d4af37]/30 text-[#f5ebd7] text-xs font-semibold uppercase tracking-widest py-2.5 px-4 rounded-md shadow-lg flex items-center hover:bg-[#d4af37]/10 transition-colors">
+            <svg class="w-4 h-4 mr-2 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Previous Week
+        </button>
+        <button onclick="changeWeek(1)" class="bg-[#1a1a1a] border border-[#d4af37]/30 text-[#f5ebd7] text-xs font-semibold uppercase tracking-widest py-2.5 px-4 rounded-md shadow-lg flex items-center hover:bg-[#d4af37]/10 transition-colors">
+            Next Week
+            <svg class="w-4 h-4 ml-2 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+    </div>
+</div>
+
+<div class="bg-[#141414] rounded-xl border border-[#d4af37]/20 shadow-2xl overflow-x-auto overflow-y-hidden custom-scrollbar mb-10">
+    <div style="min-width: 1200px;">
+        <!-- Header row showing Days -->
+        <div class="grid grid-cols-7 border-b border-[#d4af37]/20 bg-gradient-to-r from-[#1a1a1a] to-[#0a0a0a] divide-x divide-[#d4af37]/10 text-center">
+            <!-- Day 1 -->
+            <div class="py-4">
+                <h4 class="text-[#f5ebd7]/50 text-xs uppercase tracking-widest font-bold">Mon</h4>
+                <p class="text-2xl font-serif text-[#f5ebd7] mt-1">26</p>
+                <p class="text-[9px] text-[#d4af37] uppercase tracking-widest mt-1">Oct</p>
+            </div>
+            <!-- Day 2 (Active) -->
+            <div class="py-4 bg-[#d4af37]/10 border-b-2 border-[#d4af37]">
+                <h4 class="text-[#d4af37] text-xs uppercase tracking-widest font-bold">Tue</h4>
+                <p class="text-2xl font-serif text-[#f5ebd7] mt-1 font-bold">27</p>
+                <p class="text-[9px] text-[#d4af37] uppercase tracking-widest mt-1">Oct</p>
+            </div>
+            <!-- Day 3 -->
+            <div class="py-4">
+                <h4 class="text-[#f5ebd7]/50 text-xs uppercase tracking-widest font-bold">Wed</h4>
+                <p class="text-2xl font-serif text-[#f5ebd7] mt-1">28</p>
+                <p class="text-[9px] text-[#d4af37] uppercase tracking-widest mt-1">Oct</p>
+            </div>
+            <!-- Day 4 -->
+            <div class="py-4">
+                <h4 class="text-[#f5ebd7]/50 text-xs uppercase tracking-widest font-bold">Thu</h4>
+                <p class="text-2xl font-serif text-[#f5ebd7] mt-1">29</p>
+                <p class="text-[9px] text-[#d4af37] uppercase tracking-widest mt-1">Oct</p>
+            </div>
+            <!-- Day 5 -->
+            <div class="py-4">
+                <h4 class="text-[#f5ebd7]/50 text-xs uppercase tracking-widest font-bold">Fri</h4>
+                <p class="text-2xl font-serif text-[#f5ebd7] mt-1">30</p>
+                <p class="text-[9px] text-[#d4af37] uppercase tracking-widest mt-1">Oct</p>
+            </div>
+            <!-- Day 6 -->
+            <div class="py-4 opacity-50">
+                <h4 class="text-[#f5ebd7]/30 text-xs uppercase tracking-widest font-bold">Sat</h4>
+                <p class="text-2xl font-serif text-[#f5ebd7]/50 mt-1">31</p>
+                <p class="text-[9px] text-[#d4af37]/50 uppercase tracking-widest mt-1">Oct</p>
+            </div>
+            <!-- Day 7 -->
+            <div class="py-4 opacity-50">
+                <h4 class="text-[#f5ebd7]/30 text-xs uppercase tracking-widest font-bold">Sun</h4>
+                <p class="text-2xl font-serif text-[#f5ebd7]/50 mt-1">01</p>
+                <p class="text-[9px] text-[#d4af37]/50 uppercase tracking-widest mt-1">Nov</p>
+            </div>
+        </div>
+
+        <!-- Calendar Grid Body -->
+        <div id="calendar-grid-body" class="grid grid-cols-7 h-[600px] divide-x divide-[#d4af37]/10 overflow-y-auto custom-scrollbar">
+            <!-- Monday Column -->
+            <div class="p-2 space-y-3 bg-[#111]">
+                <div class="bg-[#1a1a1a] border border-blue-500/20 p-3 rounded-lg shadow-md hover:border-blue-500/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-blue-400 uppercase tracking-widest font-bold">07:30 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Bangalore North</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck E</p>
+                </div>
+                
+                <div class="bg-[#1a1a1a] border border-blue-500/20 p-3 rounded-lg shadow-md hover:border-blue-500/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-blue-400 uppercase tracking-widest font-bold">09:00 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Ilkal Center</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck A</p>
+                </div>
+                
+                <div class="bg-[#1a1a1a] border border-blue-500/20 p-3 rounded-lg shadow-md hover:border-blue-500/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-blue-400 uppercase tracking-widest font-bold">02:00 PM</span>
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Hubli Zone</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Van 2</p>
+                </div>
+            </div>
+
+            <!-- Tuesday Column (Today) -->
+            <div class="p-2 space-y-3 bg-[#1a1a1a]/40 relative">
+                <div class="absolute top-[40%] left-0 w-full h-[1px] bg-red-500/50 z-0"></div>
+                <div class="absolute top-[40%] -left-1 w-2 h-2 rounded-full bg-red-500 z-0"></div>
+                <span class="absolute top-[37.5%] right-2 text-[8px] text-red-500 font-bold uppercase tracking-widest z-0">Current Time</span>
+
+                <div class="bg-[#1a1a1a] border border-blue-500/20 p-3 rounded-lg shadow-md hover:border-blue-500/50 cursor-pointer transition-colors group relative z-10">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-blue-400 uppercase tracking-widest font-bold">08:15 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Mysore Silk Coop</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Van 3</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-[#2a1a1a] to-black border border-[#d4af37]/40 p-3 rounded-lg shadow-lg hover:border-[#d4af37] cursor-pointer transition-colors group relative z-10 mt-8">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#d4af37] uppercase tracking-widest font-bold">10:00 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-[#d4af37] animate-pulse"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Bangalore South</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck C</p>
+                    <div class="mt-3 pt-2 border-t border-[#d4af37]/20 flex justify-between items-center">
+                        <span class="text-[9px] text-[#f5ebd7]/50">ID: #PK-8846</span>
+                        <span class="bg-[#d4af37]/20 text-[#d4af37] text-[8px] px-2 py-0.5 rounded border border-[#d4af37]/30">Active</span>
+                    </div>
+                </div>
+
+                <div class="bg-[#1a1a1a] border border-red-500/20 p-3 rounded-lg shadow-md hover:border-red-500/50 cursor-pointer transition-colors group relative overflow-hidden mt-8">
+                    <div class="absolute right-0 top-0 w-8 h-8 bg-red-900/10 rounded-bl-full"></div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#ff9999] uppercase tracking-widest font-bold">01:00 PM</span>
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Dharwad Port</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck F</p>
+                </div>
+
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/20 p-3 rounded-lg shadow-md hover:border-[#d4af37]/50 cursor-pointer transition-colors group relative z-10 mt-8">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#f5ebd7]/60 uppercase tracking-widest font-bold">04:00 PM</span>
+                        <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Udupi Center</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck D</p>
+                    <div class="mt-3 pt-2 border-t border-[#d4af37]/10 flex justify-between items-center">
+                        <span class="text-[9px] text-[#f5ebd7]/50">ID: #PK-8847</span>
+                        <span class="bg-gray-800 text-gray-400 text-[8px] px-2 py-0.5 rounded border border-gray-600">Upcoming</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wednesday Column -->
+            <div class="p-2 space-y-3 bg-[#111]">
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/20 p-3 rounded-lg shadow-md hover:border-[#d4af37]/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#f5ebd7]/60 uppercase tracking-widest font-bold">08:30 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Mysore Hub</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck A</p>
+                </div>
+                
+                <div class="bg-[#1a1a1a] border border-red-500/20 p-3 rounded-lg shadow-md hover:border-red-500/50 cursor-pointer transition-colors group relative overflow-hidden">
+                    <div class="absolute right-0 top-0 w-8 h-8 bg-red-900/10 rounded-bl-full"></div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#ff9999] uppercase tracking-widest font-bold">11:00 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Mangalore Port</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Van 1 (Unassigned)</p>
+                </div>
+
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/20 p-3 rounded-lg shadow-md hover:border-[#d4af37]/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#f5ebd7]/60 uppercase tracking-widest font-bold">03:45 PM</span>
+                        <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Ilkal Center</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck B</p>
+                </div>
+            </div>
+
+            <!-- Thursday Column -->
+            <div class="p-2 space-y-3 bg-[#111]">
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/20 p-3 rounded-lg shadow-md hover:border-[#d4af37]/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#f5ebd7]/60 uppercase tracking-widest font-bold">09:00 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Hubli Zone</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck B</p>
+                </div>
+
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/20 p-3 rounded-lg shadow-md hover:border-[#d4af37]/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#f5ebd7]/60 uppercase tracking-widest font-bold">12:30 PM</span>
+                        <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Bangalore North</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Van 2</p>
+                </div>
+            </div>
+
+            <!-- Friday Column -->
+            <div class="p-2 space-y-3 bg-[#111]">
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/20 p-3 rounded-lg shadow-md hover:border-[#d4af37]/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#f5ebd7]/60 uppercase tracking-widest font-bold">08:00 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Udupi Center</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck C</p>
+                </div>
+
+                <div onclick="openScheduleModal()" class="bg-gradient-to-br from-[#1a1a1a] to-black border border-[#d4af37]/20 p-3 rounded-lg shadow-md border-dashed cursor-pointer hover:border-[#d4af37]/50 transition-colors mt-3">
+                    <div class="flex flex-col items-center justify-center h-24 text-center">
+                        <svg class="w-6 h-6 text-[#d4af37]/30 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        <span class="text-[10px] text-[#f5ebd7]/50 uppercase tracking-widest font-bold">Schedule New</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saturday Column -->
+            <div class="p-2 space-y-3 bg-[#0a0a0a]">
+                <div class="bg-[#1a1a1a] border border-[#d4af37]/20 p-3 rounded-lg shadow-md hover:border-[#d4af37]/50 cursor-pointer transition-colors group">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-[#f5ebd7]/60 uppercase tracking-widest font-bold">10:00 AM</span>
+                        <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">Mangalore Port</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">Truck D</p>
+                </div>
+            </div>
+
+            <!-- Sunday Column -->
+            <div class="p-2 space-y-3 bg-[#0a0a0a]">
+                <!-- Empty -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Scheduling -->
+<div id="schedule-modal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeScheduleModal()"></div>
+    <div class="bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] border border-[#d4af37]/30 rounded-xl w-full max-w-md shadow-[0_0_50px_rgba(212,175,55,0.15)] relative z-10 transform scale-95 opacity-0 transition-all duration-300" id="schedule-modal-content">
+        <div class="p-6 border-b border-[#d4af37]/20 flex justify-between items-center">
+            <h3 class="text-xl font-serif text-[#f5ebd7]">Schedule Dispatch</h3>
+            <button onclick="closeScheduleModal()" class="text-[#d4af37]/60 hover:text-[#d4af37] transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="block text-[10px] font-bold text-[#d4af37] uppercase tracking-widest mb-1">Select Hub</label>
+                <select class="w-full bg-[#111] border border-[#d4af37]/30 rounded px-3 py-2 text-[#f5ebd7] text-sm focus:outline-none focus:border-[#d4af37]">
+                    <option>Mysore Silk Coop</option>
+                    <option>Ilkal Center</option>
+                    <option>Hubli Zone</option>
+                    <option>Bangalore South</option>
+                    <option>Mangalore Port</option>
+                    <option>Udupi Center</option>
+                    <option>Bangalore North</option>
+                    <option>Dharwad Port</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-[#d4af37] uppercase tracking-widest mb-1">Date</label>
+                    <input type="date" class="w-full bg-[#111] border border-[#d4af37]/30 rounded px-3 py-2 text-[#f5ebd7] text-sm focus:outline-none focus:border-[#d4af37]" value="2026-10-30" style="color-scheme: dark;">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-[#d4af37] uppercase tracking-widest mb-1">Time</label>
+                    <input type="time" class="w-full bg-[#111] border border-[#d4af37]/30 rounded px-3 py-2 text-[#f5ebd7] text-sm focus:outline-none focus:border-[#d4af37]" value="09:00" style="color-scheme: dark;">
+                </div>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-[#d4af37] uppercase tracking-widest mb-1">Assign Fleet</label>
+                <select class="w-full bg-[#111] border border-[#d4af37]/30 rounded px-3 py-2 text-[#f5ebd7] text-sm focus:outline-none focus:border-[#d4af37]">
+                    <option>Truck A (Available)</option>
+                    <option>Truck B (Available)</option>
+                    <option>Van 1 (Available)</option>
+                    <option disabled class="text-red-500">Truck C (In Transit)</option>
+                </select>
+            </div>
+        </div>
+        <div class="p-6 border-t border-[#d4af37]/20 flex justify-end">
+            <button onclick="confirmSchedule()" class="bg-gradient-to-r from-[#d4af37] to-[#b8860b] text-black font-bold uppercase tracking-widest text-xs px-6 py-2.5 rounded shadow-lg hover:brightness-110 transition-all">
+                Confirm & Schedule
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Week Changing Simulation with Data Swapping
+    let currentWeekOffset = 0;
+    
+    // Mock Data for Different Weeks (WITHOUT edit buttons as requested)
+    const weekData = {
+        "-1": [
+            [ { time: "10:00 AM", location: "Mysore Hub", vehicle: "Truck A", active: false, id: "#PK-8700" } ],
+            [ { time: "01:00 PM", location: "Bangalore South", vehicle: "Van 1", active: false, id: "#PK-8701" }, { time: "03:30 PM", location: "Udupi Center", vehicle: "Truck C", active: false, id: "#PK-8702" } ],
+            [ { time: "09:15 AM", location: "Ilkal Center", vehicle: "Truck B", active: false, id: "#PK-8705" } ],
+            [],
+            [ { time: "11:00 AM", location: "Mangalore Port", vehicle: "Truck D", active: false, id: "#PK-8710" } ],
+            [],
+            []
+        ],
+        "0": [
+            [
+                { time: "07:30 AM", location: "Bangalore North", vehicle: "Truck E", active: false, id: "#PK-8839" },
+                { time: "09:00 AM", location: "Ilkal Center", vehicle: "Truck A", active: false, id: "#PK-8840" },
+                { time: "02:00 PM", location: "Hubli Zone", vehicle: "Van 2", active: false, id: "#PK-8841" }
+            ],
+            [
+                { time: "08:15 AM", location: "Mysore Silk Coop", vehicle: "Van 3", active: false, id: "#PK-8845" },
+                { time: "10:00 AM", location: "Bangalore South", vehicle: "Truck C", active: true, id: "#PK-8846" },
+                { time: "01:00 PM", location: "Dharwad Port", vehicle: "Truck F", delayed: true, id: "#PK-8848" },
+                { time: "04:00 PM", location: "Udupi Center", vehicle: "Truck D", upcoming: true, id: "#PK-8847" }
+            ],
+            [
+                { time: "08:30 AM", location: "Mysore Hub", vehicle: "Truck A", active: false, id: "#PK-8848" },
+                { time: "11:00 AM", location: "Mangalore Port", vehicle: "Van 1 (Unassigned)", delayed: true, id: "#PK-8849" },
+                { time: "03:45 PM", location: "Ilkal Center", vehicle: "Truck B", active: false, id: "#PK-8851" }
+            ],
+            [
+                { time: "09:00 AM", location: "Hubli Zone", vehicle: "Truck B", active: false, id: "#PK-8850" },
+                { time: "12:30 PM", location: "Bangalore North", vehicle: "Van 2", active: false, id: "#PK-8852" }
+            ],
+            [
+                { time: "08:00 AM", location: "Udupi Center", vehicle: "Truck C", active: false, id: "#PK-8855" }
+            ],
+            [
+                { time: "10:00 AM", location: "Mangalore Port", vehicle: "Truck D", active: false, id: "#PK-8860" }
+            ],
+            []
+        ],
+        "1": [
+            [
+                { time: "08:00 AM", location: "Udupi Center", vehicle: "Truck A", active: false, id: "#PK-8901" },
+                { time: "02:30 PM", location: "Mysore Silk Coop", vehicle: "Truck B", active: false, id: "#PK-8902" },
+                { time: "05:00 PM", location: "Bangalore South", vehicle: "Van 2", active: false, id: "#PK-8903" }
+            ],
+            [ { time: "09:00 AM", location: "Ilkal Center", vehicle: "Truck C", active: false, id: "#PK-8904" } ],
+            [],
+            [
+                { time: "10:30 AM", location: "Mangalore Port", vehicle: "Truck D", active: false, id: "#PK-8910" },
+                { time: "04:00 PM", location: "Hubli Zone", vehicle: "Van 1", active: false, id: "#PK-8911" }
+            ],
+            [ { time: "01:00 PM", location: "Mysore Hub", vehicle: "Truck A", active: false, id: "#PK-8915" } ],
+            [],
+            []
+        ]
+    };
+    
+    function generateCardHTML(item) {
+        // Edit button has been removed completely per request
+        if (item.active) {
+            return `
+            <div class="bg-gradient-to-br from-[#2a1a1a] to-black border border-[#d4af37]/40 p-3 rounded-lg shadow-lg hover:border-[#d4af37] cursor-pointer transition-colors group relative z-10">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[9px] text-[#d4af37] uppercase tracking-widest font-bold">${item.time}</span>
+                    <span class="w-2 h-2 rounded-full bg-[#d4af37] animate-pulse"></span>
+                </div>
+                <h5 class="text-sm font-semibold text-[#f5ebd7]">${item.location}</h5>
+                <p class="text-xs text-[#f5ebd7]/60 mt-1">${item.vehicle}</p>
+                <div class="mt-3 pt-2 border-t border-[#d4af37]/20 flex justify-between items-center">
+                    <span class="text-[9px] text-[#f5ebd7]/50">ID: ${item.id}</span>
+                    <span class="bg-[#d4af37]/20 text-[#d4af37] text-[8px] px-2 py-0.5 rounded border border-[#d4af37]/30">Active</span>
+                </div>
+            </div>`;
+        } else if (item.upcoming) {
+            return `
+            <div class="bg-[#1a1a1a] border border-[#d4af37]/20 p-3 rounded-lg shadow-md hover:border-[#d4af37]/50 cursor-pointer transition-colors group relative z-10 mt-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[9px] text-[#f5ebd7]/60 uppercase tracking-widest font-bold">${item.time}</span>
+                    <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                </div>
+                <h5 class="text-sm font-semibold text-[#f5ebd7]">${item.location}</h5>
+                <p class="text-xs text-[#f5ebd7]/60 mt-1">${item.vehicle}</p>
+                <div class="mt-3 pt-2 border-t border-[#d4af37]/10 flex justify-between items-center">
+                    <span class="text-[9px] text-[#f5ebd7]/50">ID: ${item.id}</span>
+                    <span class="bg-gray-800 text-gray-400 text-[8px] px-2 py-0.5 rounded border border-gray-600">Upcoming</span>
+                </div>
+            </div>`;
+        } else if (item.delayed) {
+            return `
+            <div class="bg-[#1a1a1a] border border-red-500/20 p-3 rounded-lg shadow-md hover:border-red-500/50 cursor-pointer transition-colors group relative overflow-hidden mt-8">
+                <div class="absolute right-0 top-0 w-8 h-8 bg-red-900/10 rounded-bl-full"></div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[9px] text-[#ff9999] uppercase tracking-widest font-bold">${item.time}</span>
+                    <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                </div>
+                <h5 class="text-sm font-semibold text-[#f5ebd7]">${item.location}</h5>
+                <p class="text-xs text-[#f5ebd7]/60 mt-1">${item.vehicle}</p>
+            </div>`;
+        } else {
+            return `
+            <div class="bg-[#1a1a1a] border border-blue-500/20 p-3 rounded-lg shadow-md hover:border-blue-500/50 cursor-pointer transition-colors group">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[9px] text-blue-400 uppercase tracking-widest font-bold">${item.time}</span>
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                </div>
+                <h5 class="text-sm font-semibold text-[#f5ebd7]">${item.location}</h5>
+                <p class="text-xs text-[#f5ebd7]/60 mt-1">${item.vehicle}</p>
+            </div>`;
+        }
+    }
+
+    function changeWeek(direction) {
+        currentWeekOffset += direction;
+        if (currentWeekOffset < -1) currentWeekOffset = -1;
+        if (currentWeekOffset > 1) currentWeekOffset = 1;
+        
+        const calBody = document.getElementById('calendar-grid-body');
+        calBody.style.opacity = '0.3';
+        calBody.style.pointerEvents = 'none';
+        
+        setTimeout(() => {
+            const days = document.querySelectorAll('.grid-cols-7 > div > p.text-2xl');
+            days.forEach((dayEl, index) => {
+                let newDate = 26 + index + (currentWeekOffset * 7);
+                let month = "OCT";
+                if (newDate > 31) { newDate -= 31; month = "NOV"; }
+                else if (newDate < 1) { newDate += 30; month = "SEP"; }
+                
+                dayEl.innerText = newDate.toString().padStart(2, '0');
+                dayEl.nextElementSibling.innerText = month;
+            });
+
+            const columns = calBody.children;
+            const newWeek = weekData[currentWeekOffset.toString()];
+            
+            for (let i = 0; i < 7; i++) {
+                const col = columns[i];
+                col.innerHTML = ''; 
+                
+                if (currentWeekOffset === 0 && i === 1) {
+                    col.innerHTML += `
+                        <div class="absolute top-[40%] left-0 w-full h-[1px] bg-red-500/50 z-0"></div>
+                        <div class="absolute top-[40%] -left-1 w-2 h-2 rounded-full bg-red-500 z-0"></div>
+                        <span class="absolute top-[37.5%] right-2 text-[8px] text-red-500 font-bold uppercase tracking-widest z-0">Current Time</span>
+                    `;
+                }
+                
+                newWeek[i].forEach(item => {
+                    col.innerHTML += generateCardHTML(item);
+                });
+                
+                if (i === 4) {
+                    col.innerHTML += `
+                        <div onclick="openScheduleModal()" class="bg-gradient-to-br from-[#1a1a1a] to-black border border-[#d4af37]/20 p-3 rounded-lg shadow-md border-dashed cursor-pointer hover:border-[#d4af37]/50 transition-colors mt-3">
+                            <div class="flex flex-col items-center justify-center h-24 text-center">
+                                <svg class="w-6 h-6 text-[#d4af37]/30 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                <span class="text-[10px] text-[#f5ebd7]/50 uppercase tracking-widest font-bold">Schedule New</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            calBody.style.opacity = '1';
+            calBody.style.pointerEvents = 'auto';
+        }, 500);
+    }
+
+    // Modal Handling
+    function openScheduleModal() {
+        document.querySelector('#schedule-modal-content h3').innerText = 'Schedule Dispatch';
+        const modal = document.getElementById('schedule-modal');
+        const content = document.getElementById('schedule-modal-content');
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.classList.add('opacity-100');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 50);
+    }
+
+    function closeScheduleModal() {
+        const modal = document.getElementById('schedule-modal');
+        const content = document.getElementById('schedule-modal-content');
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }, 300);
+    }
+
+    async function confirmSchedule() {
+        const hubSelect = document.querySelector('#schedule-modal-content select').value;
+        const dateInput = document.querySelector('#schedule-modal-content input[type="date"]').value;
+        const timeInput = document.querySelector('#schedule-modal-content input[type="time"]').value || "09:00";
+        const fleetSelect = document.querySelectorAll('#schedule-modal-content select')[1].value;
+
+        try {
+            const response = await fetch('/supplier/schedule/api/new', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    hub: hubSelect,
+                    date: dateInput,
+                    time: timeInput,
+                    fleet: fleetSelect
+                })
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                // visually append it
+                let timeStr = timeInput;
+                if(timeInput.length === 5) {
+                   let hr = parseInt(timeInput.split(':')[0]);
+                   let min = timeInput.split(':')[1];
+                   let ampm = hr >= 12 ? 'PM' : 'AM';
+                   hr = hr % 12;
+                   hr = hr ? hr : 12;
+                   timeStr = hr.toString().padStart(2, '0') + ':' + min + ' ' + ampm;
+                }
+                
+                let colIndex = 4;
+                if(dateInput) {
+                    const d = new Date(dateInput);
+                    let day = d.getDay();
+                    colIndex = day === 0 ? 6 : day - 1; 
+                }
+
+                const targetCol = document.getElementById('calendar-grid-body').children[colIndex];
+                
+                const newCard = document.createElement('div');
+                newCard.className = 'bg-[#1a1a1a] border border-green-500/30 p-3 rounded-lg shadow-md mb-3 opacity-0 transform scale-95 transition-all duration-500 group';
+                newCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] text-green-400 uppercase tracking-widest font-bold">${timeStr}</span>
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    </div>
+                    <h5 class="text-sm font-semibold text-[#f5ebd7]">${hubSelect}</h5>
+                    <p class="text-xs text-[#f5ebd7]/60 mt-1">${fleetSelect.split(' ')[0]}</p>
+                `;
+                
+                const lastChild = targetCol.lastElementChild;
+                if (lastChild && lastChild.innerText && lastChild.innerText.includes('SCHEDULE NEW')) {
+                    targetCol.insertBefore(newCard, lastChild);
+                } else {
+                    targetCol.appendChild(newCard);
+                }
+                
+                setTimeout(() => {
+                    newCard.classList.remove('opacity-0', 'scale-95');
+                }, 50);
+                
+                closeScheduleModal();
+            } else {
+                alert('Failed to save schedule: ' + result.message);
+            }
+        } catch (e) {
+            console.error(e);
+            alert('An error occurred while saving.');
+        }
+    }
+
+    async function loadPersistedSchedules() {
+        try {
+            const response = await fetch('/supplier/schedule/api/list');
+            const result = await response.json();
+            
+            if (result.success && result.data.length > 0) {
+                result.data.forEach(schedule => {
+                    const d = new Date(schedule.dispatch_date);
+                    let day = d.getDay();
+                    let colIndex = day === 0 ? 6 : day - 1;
+                    
+                    let timeStr = schedule.dispatch_time;
+                    if(timeStr.length === 5) {
+                       let hr = parseInt(timeStr.split(':')[0]);
+                       let min = timeStr.split(':')[1];
+                       let ampm = hr >= 12 ? 'PM' : 'AM';
+                       hr = hr % 12;
+                       hr = hr ? hr : 12;
+                       timeStr = hr.toString().padStart(2, '0') + ':' + min + ' ' + ampm;
+                    }
+                    
+                    const targetCol = document.getElementById('calendar-grid-body').children[colIndex];
+                    if (targetCol) {
+                        const newCard = document.createElement('div');
+                        newCard.className = 'bg-[#1a1a1a] border border-green-500/30 p-3 rounded-lg shadow-md mb-3 group';
+                        newCard.innerHTML = `
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[9px] text-green-400 uppercase tracking-widest font-bold">${timeStr}</span>
+                                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            </div>
+                            <h5 class="text-sm font-semibold text-[#f5ebd7]">${schedule.hub_name}</h5>
+                            <p class="text-xs text-[#f5ebd7]/60 mt-1">${schedule.fleet_assigned.split(' ')[0]}</p>
+                        `;
+                        
+                        const lastChild = targetCol.lastElementChild;
+                        if (lastChild && lastChild.innerText && lastChild.innerText.includes('SCHEDULE NEW')) {
+                            targetCol.insertBefore(newCard, lastChild);
+                        } else {
+                            targetCol.appendChild(newCard);
+                        }
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Error loading persisted schedules', e);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadPersistedSchedules);
+    
+    const originalChangeWeek = changeWeek;
+    changeWeek = function(direction) {
+        originalChangeWeek(direction);
+        setTimeout(loadPersistedSchedules, 550);
+    }
+</script>
+{% endblock %}

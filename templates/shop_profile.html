@@ -1,0 +1,388 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Profile Settings - Heritage Handloom{% endblock %}
+{% block header_title %}Profile Settings{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background-image: radial-gradient(rgba(212, 175, 55, 0.05) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6 pb-10">
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        <!-- Sidebar Navigation (Settings specific) -->
+        <div class="lg:col-span-1 space-y-4">
+            <div class="glass-panel p-4 rounded-2xl border border-gray-800">
+                <nav class="space-y-2">
+                    <a href="#" id="nav-personal" onclick="event.preventDefault(); switchTab('personal')" class="nav-tab-btn flex items-center space-x-3 p-3 rounded-xl bg-brand-gold/10 text-brand-gold border border-brand-gold/30">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <span class="text-sm font-bold">Personal Information</span>
+                    </a>
+                    <a href="#" id="nav-addresses" onclick="event.preventDefault(); switchTab('addresses')" class="nav-tab-btn flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:text-white hover:bg-[#1a1a1a] transition-colors border border-transparent">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <span class="text-sm font-medium">Addresses</span>
+                    </a>
+                    <a href="#" id="nav-security" onclick="event.preventDefault(); switchTab('security')" class="nav-tab-btn flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:text-white hover:bg-[#1a1a1a] transition-colors border border-transparent">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        <span class="text-sm font-medium">Security</span>
+                    </a>
+                    <a href="#" id="nav-notifications" onclick="event.preventDefault(); switchTab('notifications')" class="nav-tab-btn flex items-center space-x-3 p-3 rounded-xl text-gray-400 hover:text-white hover:bg-[#1a1a1a] transition-colors border border-transparent">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        <span class="text-sm font-medium">Notifications</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Form Area -->
+        <div class="lg:col-span-3 relative">
+            <!-- Personal Information Tab -->
+            <div id="tab-personal" class="profile-tab glass-panel p-8 rounded-2xl border border-gray-800 transition-opacity duration-300 block">
+                <div class="flex items-center space-x-6 mb-8 border-b border-gray-800 pb-8">
+                    <div class="relative">
+                        <div class="w-24 h-24 rounded-full bg-[#111] border-2 border-brand-gold/30 flex items-center justify-center overflow-hidden">
+                            <span id="display-initials" class="text-3xl text-brand-gold font-serif">TC</span>
+                        </div>
+                        <button class="absolute bottom-0 right-0 w-8 h-8 bg-brand-gold rounded-full flex items-center justify-center border-2 border-black hover:bg-yellow-500 transition-colors">
+                            <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </button>
+                    </div>
+                    <div>
+                        <h3 id="display-name" class="text-2xl font-serif text-white mb-1">{{ session.get('name', 'Test Customer') }}</h3>
+                        <p class="text-sm text-gray-400">Customer Member since May 2026</p>
+                    </div>
+                </div>
+
+                <form class="space-y-6" onsubmit="event.preventDefault(); saveProfile();">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400 uppercase tracking-wider font-bold">First Name</label>
+                            <input type="text" id="profile-first" value="Test" class="w-full bg-[#111] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-brand-gold transition-colors">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400 uppercase tracking-wider font-bold">Last Name</label>
+                            <input type="text" id="profile-last" value="Customer" class="w-full bg-[#111] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-brand-gold transition-colors">
+                        </div>
+                        <div class="space-y-2 md:col-span-2">
+                            <label class="text-xs text-gray-400 uppercase tracking-wider font-bold">Email Address</label>
+                            <input type="email" id="profile-email" value="customer@heritage.com" class="w-full bg-[#111] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-brand-gold transition-colors">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400 uppercase tracking-wider font-bold">Phone Number</label>
+                            <input type="tel" id="profile-phone" value="+91 9876543210" class="w-full bg-[#111] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-brand-gold transition-colors">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400 uppercase tracking-wider font-bold">Preferred Contact Method</label>
+                            <select id="profile-method" class="w-full bg-[#111] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-brand-gold transition-colors">
+                                <option>Email</option>
+                                <option>SMS / WhatsApp</option>
+                                <option>Phone Call</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 mt-6 border-t border-gray-800 flex justify-end space-x-4">
+                        <button type="button" class="px-6 py-2 rounded-lg border border-gray-700 text-gray-300 hover:text-white hover:bg-[#1a1a1a] transition-colors font-bold text-sm">Cancel</button>
+                        <button type="submit" class="px-6 py-2 rounded-lg bg-brand-gold text-black hover:bg-yellow-500 transition-colors font-bold text-sm shadow-[0_0_15px_rgba(212,175,55,0.3)]">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Addresses Tab -->
+            <div id="tab-addresses" class="profile-tab glass-panel p-8 rounded-2xl border border-gray-800 transition-opacity duration-300 hidden">
+                <div class="flex items-center justify-between mb-8 border-b border-gray-800 pb-8">
+                    <div>
+                        <h3 class="text-2xl font-serif text-white mb-1">Saved Addresses</h3>
+                        <p class="text-sm text-gray-400">Manage your shipping and billing addresses</p>
+                    </div>
+                    <button onclick="addAddress()" class="px-4 py-2 bg-[#1a1a1a] border border-gray-700 text-brand-gold rounded hover:text-yellow-500 transition-colors text-sm font-bold cursor-pointer">+ Add New Address</button>
+                </div>
+                
+                <div id="addresses-container" class="space-y-4">
+                    <!-- JS renders addresses here -->
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div id="tab-security" class="profile-tab glass-panel p-8 rounded-2xl border border-gray-800 transition-opacity duration-300 hidden">
+                <div class="mb-8 border-b border-gray-800 pb-8">
+                    <h3 class="text-2xl font-serif text-white mb-1">Security Settings</h3>
+                    <p class="text-sm text-gray-400">Manage your password and security preferences</p>
+                </div>
+                
+                <form class="space-y-6" onsubmit="event.preventDefault(); window.showToast('Password updated successfully!'); this.reset();">
+                    <div class="space-y-4 max-w-md">
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400 uppercase tracking-wider font-bold">Current Password</label>
+                            <input type="password" class="w-full bg-[#111] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-brand-gold transition-colors" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400 uppercase tracking-wider font-bold">New Password</label>
+                            <input type="password" class="w-full bg-[#111] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-brand-gold transition-colors" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-400 uppercase tracking-wider font-bold">Confirm New Password</label>
+                            <input type="password" class="w-full bg-[#111] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-brand-gold transition-colors" required>
+                        </div>
+                        <button type="submit" class="mt-4 px-6 py-2 rounded-lg bg-[#1a1a1a] border border-gray-700 text-white hover:bg-gray-800 transition-colors font-bold text-sm">Update Password</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div id="tab-notifications" class="profile-tab glass-panel p-8 rounded-2xl border border-gray-800 transition-opacity duration-300 hidden">
+                <div class="mb-8 border-b border-gray-800 pb-8">
+                    <h3 class="text-2xl font-serif text-white mb-1">Notification Preferences</h3>
+                    <p class="text-sm text-gray-400">Control what updates you receive from us</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between p-4 bg-[#111] rounded-xl border border-gray-800">
+                        <div>
+                            <h4 class="text-white font-bold mb-1">Order Updates</h4>
+                            <p class="text-xs text-gray-400">Get notified when your order status changes</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" checked onchange="window.showToast('Preferences saved')">
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-4 bg-[#111] rounded-xl border border-gray-800">
+                        <div>
+                            <h4 class="text-white font-bold mb-1">Promotional Emails</h4>
+                            <p class="text-xs text-gray-400">Receive offers and heritage collection updates</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="" class="sr-only peer" onchange="window.showToast('Preferences saved')">
+                            <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        
+    </div>
+
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+<script>
+    // Global Toast Function (Included here for the form submit)
+    window.showToast = function(message) {
+        const toast = document.createElement('div');
+        toast.className = 'bg-black/90 border border-brand-gold/50 shadow-lg text-white px-5 py-3 rounded-lg text-sm transition-opacity duration-300 opacity-0';
+        toast.innerHTML = `<span class="flex items-center"><svg class="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>${message}</span>`;
+        const container = document.getElementById('toast-container');
+        if(container) {
+            container.appendChild(toast);
+            setTimeout(() => toast.style.opacity = '1', 10);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
+    };
+
+    
+    // Tab Switching Logic
+    window.switchTab = function(tabId) {
+        // Hide all tabs
+        const tabs = document.querySelectorAll('.profile-tab');
+        tabs.forEach(tab => {
+            tab.classList.add('hidden');
+            tab.classList.remove('block');
+        });
+
+        // Show selected tab
+        const selectedTab = document.getElementById('tab-' + tabId);
+        if (selectedTab) {
+            selectedTab.classList.remove('hidden');
+            selectedTab.classList.add('block');
+        }
+
+        // Reset nav styles
+        const navBtns = document.querySelectorAll('.nav-tab-btn');
+        navBtns.forEach(btn => {
+            btn.classList.remove('bg-brand-gold/10', 'text-brand-gold', 'border-brand-gold/30');
+            btn.classList.add('text-gray-400', 'border-transparent');
+        });
+
+        // Apply active style to selected nav
+        const activeNav = document.getElementById('nav-' + tabId);
+        if (activeNav) {
+            activeNav.classList.remove('text-gray-400', 'border-transparent');
+            activeNav.classList.add('bg-brand-gold/10', 'text-brand-gold', 'border-brand-gold/30');
+        }
+    };
+
+    // Profile Management Logic
+    function loadProfile() {
+        const profile = JSON.parse(localStorage.getItem('userProfile'));
+        if (profile) {
+            document.getElementById('profile-first').value = profile.first || '';
+            document.getElementById('profile-last').value = profile.last || '';
+            document.getElementById('profile-email').value = profile.email || '';
+            document.getElementById('profile-phone').value = profile.phone || '';
+            document.getElementById('profile-method').value = profile.method || 'Email';
+            updateNameDisplays(profile.first, profile.last);
+        }
+    }
+
+    function saveProfile() {
+        const profile = {
+            first: document.getElementById('profile-first').value,
+            last: document.getElementById('profile-last').value,
+            email: document.getElementById('profile-email').value,
+            phone: document.getElementById('profile-phone').value,
+            method: document.getElementById('profile-method').value
+        };
+        localStorage.setItem('userProfile', JSON.stringify(profile));
+        updateNameDisplays(profile.first, profile.last);
+        window.showToast('Profile updated successfully!');
+    }
+
+    function updateNameDisplays(first, last) {
+        if(first || last) {
+            document.getElementById('display-name').innerText = `${first} ${last}`.trim();
+            const initials = `${first ? first.charAt(0) : ''}${last ? last.charAt(0) : ''}`.toUpperCase();
+            document.getElementById('display-initials').innerText = initials || 'TC';
+        }
+    }
+
+    
+    // Addresses Management Logic
+    const defaultAddresses = [
+        { 
+            id: 1, 
+            label: 'Home', 
+            lines: '123 Heritage Lane, Apt 4B<br>Banjara Hills<br>Hyderabad, Telangana 500034<br>India', 
+            isDefault: true 
+        }
+    ];
+
+    function renderAddresses() {
+        let addresses = JSON.parse(localStorage.getItem('userAddresses'));
+        if (!addresses || addresses.length === 0) {
+            addresses = defaultAddresses;
+            localStorage.setItem('userAddresses', JSON.stringify(addresses));
+        }
+
+        const container = document.getElementById('addresses-container');
+        if(!container) return;
+        
+        container.innerHTML = '';
+        
+        addresses.forEach(addr => {
+            const borderClass = addr.isDefault ? 'border-brand-gold/30' : 'border-gray-800';
+            const defaultBadge = addr.isDefault ? '<div class="absolute top-6 right-6"><span class="px-3 py-1 bg-brand-gold/20 text-brand-gold text-xs font-bold rounded-full">Default</span></div>' : `<div class="absolute top-6 right-6"><button onclick="setDefaultAddress(${addr.id})" class="text-xs text-gray-500 hover:text-brand-gold transition-colors">Set as Default</button></div>`;
+            
+            container.innerHTML += `
+                <div class="p-6 rounded-xl border ${borderClass} bg-[#111] relative group transition-colors hover:border-gray-600">
+                    ${defaultBadge}
+                    <h4 class="text-white font-bold mb-2">${addr.label}</h4>
+                    <p class="text-sm text-gray-300 leading-relaxed mb-4">
+                        ${addr.lines}
+                    </p>
+                    <div class="flex space-x-4 text-sm font-bold">
+                        <button onclick="editAddress(${addr.id})" class="text-gray-400 hover:text-white transition-colors cursor-pointer">Edit</button>
+                        <button onclick="removeAddress(${addr.id})" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer">Remove</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    window.addAddress = function() {
+        const label = prompt("Address Label (e.g., Home, Office):", "Work");
+        if(!label) return;
+        const line1 = prompt("Address Line 1:");
+        const city = prompt("City & State:");
+        const pin = prompt("Pincode/ZIP:");
+        
+        if (label && line1 && city && pin) {
+            let addresses = JSON.parse(localStorage.getItem('userAddresses')) || defaultAddresses;
+            const formattedLines = `${line1}<br>${city}<br>${pin}<br>India`;
+            addresses.push({
+                id: Date.now(),
+                label: label,
+                lines: formattedLines,
+                isDefault: addresses.length === 0
+            });
+            localStorage.setItem('userAddresses', JSON.stringify(addresses));
+            window.showToast("Address added successfully");
+            renderAddresses();
+        } else {
+            window.showToast("Address addition cancelled");
+        }
+    };
+
+    window.editAddress = function(id) {
+        let addresses = JSON.parse(localStorage.getItem('userAddresses'));
+        const addr = addresses.find(a => a.id === id);
+        if(!addr) return;
+        
+        const parts = addr.lines.split('<br>');
+        const currLine1 = parts[0] || '';
+        const currCity = parts[1] || '';
+        const currPin = parts[2] || '';
+        
+        const newLabel = prompt("Edit Label:", addr.label);
+        if(newLabel === null) return;
+        
+        const newLine1 = prompt("Edit Address Line 1:", currLine1);
+        if(newLine1 === null) return;
+        
+        const newCity = prompt("Edit City & State:", currCity);
+        if(newCity === null) return;
+        
+        const newPin = prompt("Edit Pincode/ZIP:", currPin);
+        if(newPin === null) return;
+        
+        addr.label = newLabel || addr.label;
+        addr.lines = `${newLine1 || currLine1}<br>${newCity || currCity}<br>${newPin || currPin}<br>India`;
+        
+        localStorage.setItem('userAddresses', JSON.stringify(addresses));
+        window.showToast("Address updated successfully");
+        renderAddresses();
+    };
+
+    window.removeAddress = function(id) {
+        if(confirm("Are you sure you want to delete this address?")) {
+            let addresses = JSON.parse(localStorage.getItem('userAddresses'));
+            const idx = addresses.findIndex(a => a.id === id);
+            const wasDefault = addresses[idx].isDefault;
+            addresses.splice(idx, 1);
+            
+            if(wasDefault && addresses.length > 0) {
+                addresses[0].isDefault = true;
+            }
+            
+            localStorage.setItem('userAddresses', JSON.stringify(addresses));
+            window.showToast("Address removed");
+            renderAddresses();
+        }
+    };
+
+    window.setDefaultAddress = function(id) {
+        let addresses = JSON.parse(localStorage.getItem('userAddresses'));
+        addresses.forEach(a => a.isDefault = (a.id === id));
+        localStorage.setItem('userAddresses', JSON.stringify(addresses));
+        window.showToast("Default address updated");
+        renderAddresses();
+    };
+
+    document.addEventListener("DOMContentLoaded", () => { loadProfile(); renderAddresses(); });
+</script>
+
+{% endblock %}

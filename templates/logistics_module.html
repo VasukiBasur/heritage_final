@@ -1,0 +1,105 @@
+{% extends 'admin_base_layout.html' %}
+
+{% block title %}Logistics
+
+{% endblock %}
+{% block header_title %}Logistics Management{% endblock %}
+
+{% block content %}
+
+
+        <!-- Flash Messages -->
+        
+
+            <div class="flex justify-between items-center mb-8 border-b border-brand-gold/20 pb-4">
+                <h2 class="text-3xl font-serif font-bold text-brand-gold">Logistics & Transport</h2>
+                <button onclick="document.getElementById('crud-modal').classList.remove('hidden')" class="bg-brand-gold text-brand-black px-4 py-2 rounded text-sm font-bold hover:bg-yellow-500 transition-colors shadow-lg shadow-brand-gold/20">+ Add New</button>
+            </div>
+            
+            <!-- Table Data -->
+            <div class="glass-card rounded-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead><tr>
+                            <th>Shipment ID</th><th>Order ID</th><th>Agency</th><th>Tracking #</th><th>Status</th><th>Est. Delivery</th>
+                        </tr></thead>
+                        <tbody>
+                            {% for l in shipments %}
+                            <tr>
+                                <td>#{{ l.shipment_id }}</td><td class='font-bold text-brand-gold'>#{{ l.order_id }}</td><td>{{ l.transport_agency }}</td><td class='font-mono'>{{ l.tracking_number }}</td><td><span class='px-2 py-1 rounded-sm text-xs border border-blue-500/30 bg-blue-900/20 text-blue-400'>{{ l.status }}</span></td><td>{{ l.estimated_delivery }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="6" class="text-center italic opacity-50 py-8">No records found. Click '+ Add New' to create one.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        
+
+
+    <!-- CRUD Modal -->
+    <div id="crud-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[999] flex items-center justify-center">
+        <div class="bg-[#1a1a1a] border border-brand-gold/40 rounded-lg shadow-[0_0_40px_rgba(212,175,55,0.2)] w-full max-w-lg p-8 relative">
+            <button onclick="document.getElementById('crud-modal').classList.add('hidden')" class="absolute top-4 right-4 text-brand-gold/50 hover:text-brand-gold">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-2xl font-serif text-brand-gold mb-6">Add New Shipment</h3>
+            <form action="/api/crud/logistics/add" method="POST" class="space-y-4">
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Order ID</label>
+                <input type="number" name="order_id" required class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none"></div>
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Transport Agency</label>
+                <input type="text" name="transport_agency" required class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none"></div>
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Tracking Number</label>
+                <input type="text" name="tracking_number" required class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none"></div>
+                <div><label class="block text-xs text-brand-lightgold/70 mb-1">Estimated Delivery</label>
+                <input type="date" name="estimated_delivery" required class="w-full bg-[#121212] border border-brand-gold/30 rounded p-2 text-brand-lightgold focus:border-brand-gold focus:outline-none"></div>
+                <div class="pt-4"><button type="submit" class="w-full bg-brand-gold text-brand-black font-bold py-3 rounded hover:bg-yellow-500 transition-colors">Save Shipment</button></div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInputs = document.querySelectorAll('input[type="text"][placeholder*="Search"]');
+            searchInputs.forEach(searchInput => {
+                searchInput.addEventListener("input", function(e) {
+                    const query = e.target.value.toLowerCase();
+                    
+                    // Filter Table Rows
+                    const tables = document.querySelectorAll("table tbody");
+                    tables.forEach(tbody => {
+                        const rows = tbody.querySelectorAll("tr");
+                        rows.forEach(row => {
+                            if (row.innerText.toLowerCase().includes(query)) {
+                                row.style.display = "";
+                            } else {
+                                row.style.display = "none";
+                            }
+                        });
+                    });
+
+                    // Filter Glass Cards (for Modules like Designs/Materials)
+                    const cards = document.querySelectorAll(".glass-card");
+                    cards.forEach(card => {
+                        // Avoid filtering structural glass cards (like dashboard charts)
+                        if (card.parentElement && card.parentElement.tagName === 'BODY') return;
+                        if (card.querySelector('canvas')) return; // ignore charts
+                        
+                        // Only filter if it's likely a grid card
+                        if (card.innerText.toLowerCase().includes(query)) {
+                            if(card.parentElement && card.parentElement.style) card.parentElement.style.display = "block";
+                            card.style.display = "block";
+                        } else {
+                            if(card.parentElement && card.parentElement.style && card.parentElement.tagName !== 'DIV') card.parentElement.style.display = "none";
+                            card.style.display = "none";
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

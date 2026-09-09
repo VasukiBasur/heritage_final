@@ -1,0 +1,137 @@
+{% extends 'base_layout.html' %}
+
+{% block title %}Sales Analytics{% endblock %}
+{% block header_title %}Sales & Revenue Analytics{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h2 class="text-3xl font-serif text-brand-gold">Sales Analytics</h2>
+        <p class="text-sm text-brand-lightgold/50 mt-1">Visualize your sales trends, revenue generation, and customer demographics.</p>
+    </div>
+    <div class="flex space-x-2">
+        <select class="bg-brand-black border border-brand-gold/30 text-brand-lightgold text-sm rounded px-3 py-2">
+            <option>Last 30 Days</option>
+            <option>This Quarter</option>
+            <option>This Year</option>
+            <option>All Time</option>
+        </select>
+        <button onclick="alert('Exporting sales report to PDF...')" class="bg-brand-gold/20 hover:bg-brand-gold/40 border border-brand-gold/50 text-brand-gold font-bold uppercase tracking-widest py-2 px-4 rounded text-xs flex items-center transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Export Report
+        </button>
+    </div>
+</div>
+
+<!-- 4 KPI Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-brand-gold shadow-lg bg-[#1a1a1a]">
+        <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase mb-2">Total Revenue</span>
+        <span class="text-3xl font-serif text-brand-gold">₹342,500</span>
+        <span class="text-[10px] text-green-400 mt-2 font-bold">+12% vs last month</span>
+    </div>
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-blue-500 shadow-lg bg-[#1a1a1a]">
+        <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase mb-2">Total Orders</span>
+        <span class="text-3xl font-serif text-blue-400">128</span>
+        <span class="text-[10px] text-green-400 mt-2 font-bold">+5% vs last month</span>
+    </div>
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-green-500 shadow-lg bg-[#1a1a1a]">
+        <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase mb-2">Average Order Value</span>
+        <span class="text-3xl font-serif text-green-400">₹2,675</span>
+        <span class="text-[10px] text-red-400 mt-2 font-bold">-2% vs last month</span>
+    </div>
+    <div class="glass-card p-6 flex flex-col justify-center border-l-4 border-l-purple-500 shadow-lg bg-[#1a1a1a]">
+        <span class="text-xs font-bold tracking-widest text-brand-lightgold/50 uppercase mb-2">Conversion Rate</span>
+        <span class="text-3xl font-serif text-purple-400">4.8%</span>
+        <span class="text-[10px] text-green-400 mt-2 font-bold">+1.2% vs last month</span>
+    </div>
+</div>
+
+<!-- Graph Placeholder Area -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="glass-card rounded overflow-hidden p-6">
+        <h3 class="text-lg font-serif text-brand-gold mb-6">Revenue Trend (Last 6 Months)</h3>
+        <!-- CSS-based Mock Bar Chart -->
+        <div class="h-64 flex items-end justify-between space-x-2 border-b border-l border-brand-gold/30 pb-2 pl-2">
+            <div class="w-full h-full flex flex-col items-center justify-end">
+                <div class="w-full bg-brand-gold/40 hover:bg-brand-gold/70 transition-colors rounded-t cursor-pointer relative group" style="height: 30%">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs text-white bg-black p-1 rounded transition-opacity shadow-lg">₹42k</span>
+                </div>
+                <span class="text-[10px] text-brand-lightgold/50 mt-2">May</span>
+            </div>
+            <div class="w-full h-full flex flex-col items-center justify-end">
+                <div class="w-full bg-brand-gold/50 hover:bg-brand-gold/70 transition-colors rounded-t cursor-pointer relative group" style="height: 45%">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs text-white bg-black p-1 rounded transition-opacity shadow-lg">₹55k</span>
+                </div>
+                <span class="text-[10px] text-brand-lightgold/50 mt-2">Jun</span>
+            </div>
+            <div class="w-full h-full flex flex-col items-center justify-end">
+                <div class="w-full bg-brand-gold/30 hover:bg-brand-gold/70 transition-colors rounded-t cursor-pointer relative group" style="height: 25%">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs text-white bg-black p-1 rounded transition-opacity shadow-lg">₹38k</span>
+                </div>
+                <span class="text-[10px] text-brand-lightgold/50 mt-2">Jul</span>
+            </div>
+            <div class="w-full h-full flex flex-col items-center justify-end">
+                <div class="w-full bg-brand-gold/60 hover:bg-brand-gold/70 transition-colors rounded-t cursor-pointer relative group" style="height: 60%">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs text-white bg-black p-1 rounded transition-opacity shadow-lg">₹72k</span>
+                </div>
+                <span class="text-[10px] text-brand-lightgold/50 mt-2">Aug</span>
+            </div>
+            <div class="w-full h-full flex flex-col items-center justify-end">
+                <div class="w-full bg-brand-gold/70 hover:bg-brand-gold/90 transition-colors rounded-t cursor-pointer relative group" style="height: 75%">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs text-white bg-black p-1 rounded transition-opacity shadow-lg">₹85k</span>
+                </div>
+                <span class="text-[10px] text-brand-lightgold/50 mt-2">Sep</span>
+            </div>
+            <div class="w-full h-full flex flex-col items-center justify-end">
+                <div class="w-full bg-brand-gold hover:bg-yellow-400 transition-colors rounded-t cursor-pointer relative group shadow-[0_0_15px_rgba(212,175,55,0.4)]" style="height: 95%">
+                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 text-xs text-white bg-black p-1 rounded transition-opacity shadow-lg">₹110k</span>
+                </div>
+                <span class="text-[10px] text-brand-lightgold/50 mt-2 font-bold text-brand-gold">Oct</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="glass-card rounded overflow-hidden p-6">
+        <h3 class="text-lg font-serif text-brand-gold mb-6">Top Selling Categories</h3>
+        <div class="space-y-6">
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-bold text-brand-lightgold uppercase tracking-widest">Silk Sarees</span>
+                    <span class="text-xs text-brand-gold font-bold">45% (₹154k)</span>
+                </div>
+                <div class="w-full bg-brand-black rounded-full h-2 border border-brand-gold/10">
+                    <div class="bg-brand-gold h-2 rounded-full shadow-[0_0_10px_rgba(212,175,55,0.5)]" style="width: 45%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-bold text-brand-lightgold uppercase tracking-widest">Pashmina Shawls</span>
+                    <span class="text-xs text-brand-gold font-bold">30% (₹102k)</span>
+                </div>
+                <div class="w-full bg-brand-black rounded-full h-2 border border-brand-gold/10">
+                    <div class="bg-blue-400 h-2 rounded-full shadow-[0_0_10px_rgba(96,165,250,0.5)]" style="width: 30%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-bold text-brand-lightgold uppercase tracking-widest">Cotton Kurtas</span>
+                    <span class="text-xs text-brand-gold font-bold">15% (₹51k)</span>
+                </div>
+                <div class="w-full bg-brand-black rounded-full h-2 border border-brand-gold/10">
+                    <div class="bg-green-400 h-2 rounded-full shadow-[0_0_10px_rgba(74,222,128,0.5)]" style="width: 15%"></div>
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-bold text-brand-lightgold uppercase tracking-widest">Handloom Dupattas</span>
+                    <span class="text-xs text-brand-gold font-bold">10% (₹34k)</span>
+                </div>
+                <div class="w-full bg-brand-black rounded-full h-2 border border-brand-gold/10">
+                    <div class="bg-purple-400 h-2 rounded-full shadow-[0_0_10px_rgba(192,132,252,0.5)]" style="width: 10%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

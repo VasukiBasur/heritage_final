@@ -1,0 +1,17 @@
+{
+    "python.analysis.exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/.venv",
+        "**/venv",
+        "**/.git"
+    ],
+    "files.exclude": {
+        "**/.venv": true,
+        "**/venv": true,
+        "**/__pycache__": true
+    },
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": true,
+    "python.linting.enabled": true
+}
