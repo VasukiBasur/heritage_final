@@ -78,6 +78,7 @@ Before deploying the web app, initialize all tables and seed data into your clou
    | `DB_SSL` | `true` |
    | `SECRET_KEY` | *(A random 32+ character string, e.g. `heritage_handloom_prod_key_2026_super_secure!`)* |
    | `FLASK_ENV` | `production` |
+   | `STRIPE_SECRET_KEY` | *(Optional Stripe API key, e.g. `sk_test_...` or `sk_live_...`)* |
 6. Click **Deploy Web Service**.
 7. In ~2 minutes, your website will be live at `https://heritage-handloom.onrender.com`!
 

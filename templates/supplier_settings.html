@@ -108,8 +108,8 @@
                         <div class="space-y-2">
                             <label class="text-xs text-gray-400 uppercase tracking-widest font-bold">Command Center API Key</label>
                             <div class="flex">
-                                <input type="password" value="REDACTED_STRIPE_SECRET" disabled class="w-full bg-[#111] border border-r-0 border-brand-gold/30 rounded-l p-2.5 text-brand-gold/70 font-mono text-sm" />
-                                <button class="bg-[#222] border border-l-0 border-brand-gold/30 rounded-r px-4 hover:bg-[#333] transition-colors text-brand-gold">
+                                <input type="password" id="command-center-key" value="{{ stripe_api_key or '' }}" disabled class="w-full bg-[#111] border border-r-0 border-brand-gold/30 rounded-l p-2.5 text-brand-gold/70 font-mono text-sm" />
+                                <button type="button" onclick="if(navigator.clipboard)navigator.clipboard.writeText(document.getElementById('command-center-key').value)" class="bg-[#222] border border-l-0 border-brand-gold/30 rounded-r px-4 hover:bg-[#333] transition-colors text-brand-gold" title="Copy Key">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                 </button>
                             </div>

@@ -24,6 +24,7 @@ app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 CORS(app)
 app.secret_key = os.getenv("SECRET_KEY", "heritage_handloom_super_secret_key_32bytes_sha256!")
+app.config['STRIPE_SECRET_KEY'] = os.getenv("STRIPE_SECRET_KEY", os.getenv("STRIPE_API_KEY", ""))
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 app.register_blueprint(api_bp, url_prefix='/api')
@@ -1721,7 +1722,8 @@ def supplier_analytics():
 def supplier_settings():
     if session.get('role') != 'Supplier' and session.get('role') != 'Admin':
         return redirect(url_for('login'))
-    return render_template("supplier_settings.html")
+    stripe_api_key = app.config.get('STRIPE_SECRET_KEY') or os.getenv("STRIPE_SECRET_KEY", os.getenv("STRIPE_API_KEY", ""))
+    return render_template("supplier_settings.html", stripe_api_key=stripe_api_key)
 
 # Customer Sub-Routes
 @app.route('/shop/products')
