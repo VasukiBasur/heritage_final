@@ -30,6 +30,27 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 app.register_blueprint(api_bp, url_prefix='/api')
 app.register_blueprint(artisan_api)
 
+def init_db_if_empty():
+    """If connected to a fresh cloud database without tables, auto-initialize the schema and seed accounts."""
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return
+        cursor = conn.cursor()
+        cursor.execute("SHOW TABLES LIKE 'users'")
+        table = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        if not table:
+            print("\n[AUTO-INIT] Fresh database detected without tables. Initializing schema and seed accounts...")
+            from setup_master_db import setup_master
+            setup_master()
+            print("[AUTO-INIT] Database initialized successfully!\n")
+    except Exception as e:
+        print(f"[AUTO-INIT] Note: Database auto-init check: {e}")
+
+init_db_if_empty()
+
 
 import jwt
 from datetime import datetime, timedelta
