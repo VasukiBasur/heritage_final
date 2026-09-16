@@ -1207,7 +1207,7 @@
             })
         });
         
-        const payloadText = `http://{{ lan_ip }}:5000/scan/${newId}`;
+        const payloadText = `${window.location.origin}/scan/${newId}`;
         const encodedPayload = encodeURIComponent(payloadText);
 
         const newRow = document.createElement('tr');
@@ -1229,7 +1229,7 @@
                         <option>Delivered</option>
                     </select>
                     <button class="bg-brand-gold text-brand-black px-2 py-1 rounded text-xs font-bold hover:bg-yellow-500" onclick="updateStatus(this)">Update</button>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data={{ ((base_url | default('http://' ~ lan_ip ~ ':5000')) ~ '/scan/') | urlencode }}28&color=000000&bgcolor=FFFFFF" alt="QR" class="w-8 h-8 object-contain border border-brand-gold/50 rounded cursor-pointer transition-transform duration-300 hover:scale-[6] hover:-translate-x-12 hover:-translate-y-8 relative z-50 shadow-2xl">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodedPayload}&color=000000&bgcolor=FFFFFF" alt="QR" class="w-8 h-8 object-contain border border-brand-gold/50 rounded cursor-pointer transition-transform duration-300 hover:scale-[6] hover:-translate-x-12 hover:-translate-y-8 relative z-50 shadow-2xl">
                 </div>
             </td>
             <td class="p-3 text-gray-200 font-bold">${qty}</td>

@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 
 pandoc-*.msi
+stripe-replacements.txt

@@ -58,6 +58,10 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy", "service": "heritage-handloom"}), 200
+
 @app.route('/')
 def index():
     return redirect(url_for('admin_dashboard'))
@@ -70,6 +74,9 @@ def login():
         role_selected = request.form.get('role', 'Admin')
 
         conn = get_db_connection()
+        if not conn:
+            flash("Database service is temporarily unreachable. Please check your database settings.", "error")
+            return render_template('login.html'), 503
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.role_id WHERE u.email = %s", (email,))
         user = cursor.fetchone()
@@ -124,6 +131,9 @@ def signup():
                 profile_data[key] = val
 
         conn = get_db_connection()
+        if not conn:
+            flash("Database service is temporarily unreachable. Please try again later.", "error")
+            return render_template('signup.html'), 503
         cursor = conn.cursor(dictionary=True)
         
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
@@ -164,6 +174,9 @@ def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email')
         conn = get_db_connection()
+        if not conn:
+            flash("Database service is temporarily unreachable. Please try again later.", "error")
+            return render_template('forgot_password.html'), 503
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT user_id FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
@@ -212,6 +225,9 @@ def verify_otp():
         
         user_id = session['otp_user_id']
         conn = get_db_connection()
+        if not conn:
+            flash("Database service is temporarily unreachable. Please try again later.", "error")
+            return render_template('verify_otp.html'), 503
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT reset_token, expires_at FROM password_resets WHERE user_id = %s", (user_id,))
         reset = cursor.fetchone()
@@ -247,6 +263,9 @@ def reset_password():
         user_id = session['otp_user_id']
         
         conn = get_db_connection()
+        if not conn:
+            flash("Database service is temporarily unreachable. Please try again later.", "error")
+            return render_template('reset_password.html'), 503
         cursor = conn.cursor()
         cursor.execute("UPDATE users SET password_hash = %s WHERE user_id = %s", (hashed_pw, user_id))
         cursor.execute("DELETE FROM password_resets WHERE user_id = %s", (user_id,))
@@ -301,7 +320,8 @@ def logout():
 def admin_dashboard():
     conn = get_db_connection()
     if not conn:
-        return "Database connection failed. Please check your .env configuration and MySQL server.", 500
+        flash("Database connection failed. Please check your cloud database configuration.", "error")
+        return redirect(url_for('login'))
     
     cursor = conn.cursor(dictionary=True)
     
@@ -343,6 +363,9 @@ def weaver_dashboard():
         return redirect(url_for('admin_dashboard'))
         
     conn = get_db_connection()
+    if not conn:
+        flash("Database connection failed. Please check your cloud database configuration.", "error")
+        return redirect(url_for('login'))
     cursor = conn.cursor(dictionary=True)
     
     # We use artisan_id = 1 for the simulated artisan, but ideally this maps to the logged in user
@@ -1910,6 +1933,13 @@ def list_supplier_schedules():
             cursor.close()
             conn.close()
     return jsonify({'success': False, 'message': 'Database connection failed'}), 500
+
+@app.errorhandler(500)
+def handle_500(e):
+    if request.path.startswith('/api/'):
+        return jsonify({"success": False, "error": "Internal Server Error. Please verify database connectivity."}), 500
+    flash("An unexpected server error occurred. Please verify your connection or try again.", "error")
+    return redirect(url_for('login')), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

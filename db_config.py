@@ -1,6 +1,6 @@
 import os
 import mysql.connector
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,13 +13,20 @@ def get_db_credentials():
         return {
             'host': parsed.hostname or 'localhost',
             'port': parsed.port or 3306,
-            'user': parsed.username or 'root',
-            'password': parsed.password or '',
+            'user': unquote(parsed.username) if parsed.username else 'root',
+            'password': unquote(parsed.password) if parsed.password else '',
             'database': parsed.path.lstrip('/') if parsed.path else 'heritage_handloom'
         }
+
+    port_val = os.getenv("DB_PORT") or os.getenv("MYSQLPORT") or 3306
+    try:
+        port = int(port_val)
+    except (ValueError, TypeError):
+        port = 3306
+
     return {
         'host': os.getenv("DB_HOST", os.getenv("MYSQLHOST", "localhost")),
-        'port': int(os.getenv("DB_PORT", os.getenv("MYSQLPORT", 3306))),
+        'port': port,
         'user': os.getenv("DB_USER", os.getenv("MYSQLUSER", "root")),
         'password': os.getenv("DB_PASSWORD", os.getenv("MYSQLPASSWORD", "")),
         'database': os.getenv("DB_NAME", os.getenv("MYSQLDATABASE", "heritage_handloom"))
@@ -29,6 +36,7 @@ def get_db_connection():
     """Create a MySQL connection compatible with local, Docker, and Cloud hosted MySQL (TiDB, Aiven, Railway, Render)."""
     try:
         conn_kwargs = get_db_credentials()
+        conn_kwargs['connect_timeout'] = 10
         
         # Cloud SSL configuration if required
         ssl_ca = os.getenv("DB_SSL_CA")
@@ -40,4 +48,7 @@ def get_db_connection():
         return mysql.connector.connect(**conn_kwargs)
     except mysql.connector.Error as err:
         print(f"Error connecting to MySQL: {err}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error connecting to MySQL: {e}")
         return None
