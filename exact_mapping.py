@@ -1,4 +1,4 @@
-import os
+import oS
 import re
 
 html_path = r'd:\dbmss\templates\shop_products.html'
